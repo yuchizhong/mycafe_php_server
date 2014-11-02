@@ -1,1 +1,0 @@
-link=http://182.92.130.225;version=1.0;force_update=YES
