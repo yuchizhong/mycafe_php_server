@@ -25,7 +25,7 @@ while ($row = mysql_fetch_array($result)) {
 	else
 		$spt = "0";
 	 */
-	$arr = array("support"=>$spt, "name"=>$row['storeName'], "ID"=>$row['storeID'], "address"=>$row['addr'], "image"=>$row['logoFile'],  "rating"=>'5', "avgPrice"=>'100', "tel"=>$row['tel'], "businessTime"=>$row['businessHour'], "desp"=>$row['description']);
+	$arr = array("support"=>$spt, 'black'=>$row['useBlackFont'], "name"=>$row['storeName'], "ID"=>$row['storeID'], "address"=>$row['addr'], "image"=>$row['logoFile'],  "rating"=>'5', "avgPrice"=>'100', "tel"=>$row['tel'], "businessTime"=>$row['businessHour'], "desp"=>$row['description']);
 	array_push($arrlist, $arr);
 }
 $arr = array('list'=>$arrlist);
