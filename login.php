@@ -235,7 +235,7 @@ function sendSMS($url,$ac,$authkey,$cgid,$m,$c,$csid,$t)
 	     }
 	 */
     }
-    /*
+    
 	else  //发送失败的返回值
 	{
 	     switch(trim($re['result'])){
@@ -254,7 +254,7 @@ function sendSMS($url,$ac,$authkey,$cgid,$m,$c,$csid,$t)
 			default:break;
 		}
 	}
-	*/
+	
 }
 
 function postSMS($url,$data='')
