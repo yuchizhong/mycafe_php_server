@@ -278,15 +278,15 @@ function sendSMS($url,$ac,$authkey,$cgid,$m,$c,$csid,$t)
 	if(trim($re['result'])==1)                               //发送成功 ，返回企业编号，员工编号，发送编号，短信条数，单价，余额
 	{
 	     foreach ($re->Item as $item)
-	  	 {
+	  	{
 			 
-			   $stat['msgid'] =trim((string)$item['msgid']);
-		       $stat['total']=trim((string)$item['total']);
-			   $stat['price']=trim((string)$item['price']);
-			   $stat['remain']=trim((string)$item['remain']);
-		       $stat_arr[]=$stat;
+			$stat['msgid'] =trim((string)$item['msgid']);
+		        $stat['total']=trim((string)$item['total']);
+			$stat['price']=trim((string)$item['price']);
+			$stat['remain']=trim((string)$item['remain']);
+		        $stat_arr[]=$stat;
 			
-         }
+		}
 	/*
 		 if(is_array($stat_arr))
 	     {
