@@ -30,6 +30,7 @@ if ($operation == "CHANGE_NAME") {
 	$result = mysql_query("DELETE FROM verification_code WHERE tel='$ID'");
         mysql_free_result($result);
 	
+	/*
         $result = mysql_query("SELECT userID FROM user_login WHERE username='$ID'");
         $haveOne = 0;
         while ($row = mysql_fetch_array($result)) { 
@@ -42,6 +43,7 @@ if ($operation == "CHANGE_NAME") {
                 echo 'ERROR'; //user exists
                 return;
         }
+	 */
 	
 	srand(seed());
 	$randed = rand(0123,9876);
@@ -125,6 +127,60 @@ if ($operation == "CHANGE_NAME") {
 	mysql_query("COMMIT");
 	
 	echo 'OK';
+} elseif ($operation == "RESET_PW") {
+        $ID = $_GET["ID"];
+        $pass = $_GET["pass"];
+        $verf = $_GET["verification"];
+        $pushT = $_GET['push_token'];
+        if ($pushT == NULL)
+                $pushT = "";
+        $userID = 0;
+        $result = mysql_query("SELECT userID FROM user_login WHERE username='$ID'");
+        $haveOne = 0;
+        while ($row = mysql_fetch_array($result)) {
+		$userID = $row['userID'];
+                $haveOne = 1;
+                break;
+        }
+        mysql_free_result($result);
+        if ($haveOne == 0) {
+                mysql_close($con);
+                echo 'ERROR';
+                return;
+        }
+
+        $result = mysql_query("SELECT code FROM verification_code WHERE tel='$ID'");
+        $code = "";
+        while ($row = mysql_fetch_array($result)) {
+                $code = $row['code'];
+                break;
+        }
+        mysql_free_result($result);
+        if ($code == NULL || $code == "" || $code != $verf) {
+                mysql_close($con);
+                echo 'ERROR_CODE';
+                return;
+        }
+
+        $result = mysql_query("DELETE FROM verification_code WHERE tel='$ID'");
+        mysql_free_result($result);
+
+        mysql_query("START TRANSACTION");
+	
+        //update password
+        $result = mysql_query("UPDATE user_login SET password='$pass' WHERE userID='$userID'");
+        mysql_free_result($result);
+        
+	//login
+        $result = mysql_query("DELETE FROM UUID_user WHERE UUID='$deviceID'");
+        mysql_free_result($result);
+
+        $result = mysql_query("INSERT INTO UUID_user VALUES ('$deviceID', '$userID', '$pushT')");
+        mysql_free_result($result);
+
+        mysql_query("COMMIT");
+
+        echo 'OK';
 } elseif ($operation == "GET_ID") {
 	$username = "";
 	$pushT = $_GET['push_token'];
@@ -138,7 +194,10 @@ if ($operation == "CHANGE_NAME") {
 		}
 		break;
 	}
-	echo $username;
+	if ($username == NULL || $username == '')
+		echo "NOF";
+	else
+		echo $username;
 	mysql_free_result($result);
 } elseif ($operation == "GET_NICKNAME") {
 	$ID = $_GET["ID"];
