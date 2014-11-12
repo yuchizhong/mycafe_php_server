@@ -31,7 +31,7 @@ $current_time = date("H:i"); //add s if need seconds
 
 mysql_query("START TRANSACTION");
 
-$q = "INSERT INTO orders VALUES (NULL, '$id', '$current_date', '$current_time', '$tableID', '$customerID', '0', '0', '0', '$total')";
+$q = "INSERT INTO orders VALUES (NULL, '$id', '$current_date', '$current_time', '$tableID', '$customerID', '0', '0', '0', '$total', '0')";
 $result = mysql_query($q);
 mysql_free_result($result);
 

@@ -103,11 +103,11 @@ if ($operation == "CHANGE_NAME") {
 	mysql_query("START TRANSACTION");
 
 	//insert new user
-	$result = mysql_query("INSERT INTO customers VALUES (NULL, $ID, '', '', '')");
+	$result = mysql_query("INSERT INTO customers VALUES (NULL, $ID, '', '', '', '0')");
 	mysql_free_result($result);
 	
 	//get userID
-	$result = mysql_query("SELECT MAX(customerID) FROM customers WHERE customerName='$ID'");
+	$result = mysql_query("SELECT MAX(customerID) FROM customers");
 	while ($row = mysql_fetch_array($result)) { 
 		$userID = $row["MAX(customerID)"];
 		break;
