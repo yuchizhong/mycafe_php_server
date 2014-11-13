@@ -130,11 +130,13 @@ if ($channel == "purse" && $storeID > 0) {
         break;
     }
     mysql_free_result($result);
+    
     $pingpp_max_no = base_convert($pingpp_max, 36, 10) + 1;
-    $pingpp_no = base_convert(strval($orderNo), 10, 36);
+    $pingpp_no = base_convert(strval($pingpp_max_no), 10, 36);
+    
     //8位补齐
-    if (strlen($pingpp_no) < 8) {
-        $pingpp_no = str_pad($pingpp_no, 8 - strlen($pingpp_no), '0', STR_PAD_LEFT);
+    if (strlen($pingpp_no) < 32) {
+        $pingpp_no = str_pad($pingpp_no, 32 - strlen($pingpp_no), '0', STR_PAD_LEFT);
     }
     
     //add payment
@@ -143,12 +145,13 @@ if ($channel == "purse" && $storeID > 0) {
     //update orders' paymentID, but not payFlag
     mysql_query("UPDATE orders SET paymentID='$paymentID' WHERE customerID='$customerID' AND storeID='$storeID' AND payFlag=0");
     
+    $amt_in_cent = intval($amount * 100);
     PingPP::setApiKey($key);
     $ch = PingPP_Charge::create(
         array(
             "subject"   => "爱易点买单",
             "body"      => "共计￥" . $amount . "（店名：" . $storeName . ",账号：" . $uname . "）",
-            "amount"    => $amount,
+            "amount"    => $amt_in_cent,
             "order_no"  => $pingpp_no,
             "currency"  => "cny",
             "extra"     => $extra,
