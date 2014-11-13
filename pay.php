@@ -63,6 +63,7 @@ if ($storeID > 0) {
     mysql_free_result($result);
 }
 
+$cli_ip = $_SERVER["REMOTE_ADDR"];
 mysql_query("START TRANSACTION");
 if ($storeID > 0) {
     $amtCheck = 0.0;
@@ -103,7 +104,7 @@ if ($channel == "purse" && $storeID > 0) {
     mysql_query("UPDATE customers SET purse=purse-'$amount' WHERE customerID='$customerID'");
     
     //add payment
-    mysql_query("INSERT INTO payment VALUES (NULL, '', '$channel', '$customerID', '$storeID', '$amount', '$current_date', '$current_time', 'payed')");
+    mysql_query("INSERT INTO payment VALUES (NULL, '', '$cli_ip', '$channel', '$customerID', '$storeID', '$amount', '$current_date', '$current_time', 'payed')");
     
     //get paymentID
     $result = mysql_query("SELECT MAX(paymentID) FROM payment");
@@ -140,7 +141,7 @@ if ($channel == "purse" && $storeID > 0) {
     }
     
     //add payment
-    mysql_query("INSERT INTO payment VALUES (NULL, '$pingpp_no', '$channel', '$customerID', '$storeID', '$amount', '$current_date', '$current_time', 'unpayed')");
+    mysql_query("INSERT INTO payment VALUES (NULL, '$pingpp_no', '$cli_ip', '$channel', '$customerID', '$storeID', '$amount', '$current_date', '$current_time', 'unpayed')");
     
     //update orders' paymentID, but not payFlag
     mysql_query("UPDATE orders SET paymentID='$paymentID' WHERE customerID='$customerID' AND storeID='$storeID' AND payFlag=0");
@@ -185,7 +186,7 @@ if ($channel == "purse" && $storeID > 0) {
     }
         
     //add payment
-    mysql_query("INSERT INTO payment VALUES (NULL, '$pingpp_no', '$channel', '$customerID', '$storeID', '$amount', '$current_date', '$current_time', 'unpayed')");
+    mysql_query("INSERT INTO payment VALUES (NULL, '$pingpp_no', '$cli_ip', '$channel', '$customerID', '$storeID', '$amount', '$current_date', '$current_time', 'unpayed')");
     
     $amt_in_cent = intval($amount * 100);
     PingPP::setApiKey($key);
@@ -198,7 +199,7 @@ if ($channel == "purse" && $storeID > 0) {
             "currency"  => "cny",
             "extra"     => $extra,
             "channel"   => $channel,
-            "client_ip" => $_SERVER["REMOTE_ADDR"],
+            "client_ip" => $cli_ip,
             "app"       => array("id" => $appid)
     )
     );
