@@ -42,6 +42,7 @@ while ($row = mysql_fetch_array($result)) {
     $orderID = $row["MAX(orderID)"];
     break;
 }
+mysql_free_result($result);
 
 foreach ($arr as $value) {
     $quantity = $value["quantity"];
@@ -56,9 +57,17 @@ foreach ($arr as $value) {
     mysql_free_result($result);
 }
 
+$totalPrice = 0.0;
+$result = mysql_query("SELECT SUM(totalPrice) FROM orders WHERE storeID='$id' AND customerID='$customerID' AND payFlag=0");
+while ($row = mysql_fetch_array($result)) {
+    $totalPrice = $row["SUM(totalPrice)"];
+    break;
+}
+mysql_free_result($result);
+
 mysql_query("COMMIT");
 
-echo $orderID;
+echo $orderID . ':' . $totalPrice;
 
 mysql_close($con);
 ?>
