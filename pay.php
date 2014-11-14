@@ -20,9 +20,6 @@ $uname = $input_data['username'];
 $key = 'sk_test_rrzLCSebzbT8SKiH4GX9SWH8';
 $appid = 'app_5qjfH0GKyPy5y5ar';
 
-//$extra 在渠道为 upmp_wap 和 alipay_wap 时，需要填入相应的参数，具体见技术指南。其他渠道时可以传空值也可以不传。 - 我们用不到
-$extra = array();
-
 $con = mysql_connect("localhost", "root", "123456");
 mysql_select_db("order");
 mysql_query("set names utf8");
@@ -126,7 +123,8 @@ if ($channel == "purse" && $storeID > 0) {
     mysql_query("INSERT INTO payment VALUES (NULL, '$pingpp_no', '$cli_ip', '$channel', '$customerID', '$storeID', '$amount', '$current_date', '$current_time', 'unpayed')");
     
     //update orders' paymentID, but not payFlag
-    mysql_query("UPDATE orders SET paymentID='$paymentID' WHERE customerID='$customerID' AND storeID='$storeID' AND payFlag=0");
+    $result = mysql_query("UPDATE orders SET paymentID='$paymentID' WHERE customerID='$customerID' AND storeID='$storeID' AND payFlag=0");
+    mysql_free_result($result);
     
     $amt_in_cent = intval($amount * 100);
     PingPP::setApiKey($key);
@@ -137,7 +135,6 @@ if ($channel == "purse" && $storeID > 0) {
             "amount"    => $amt_in_cent,
             "order_no"  => $pingpp_no,
             "currency"  => "cny",
-            "extra"     => $extra,
             "channel"   => $channel,
             "client_ip" => $_SERVER["REMOTE_ADDR"],
             "app"       => array("id" => $appid)
@@ -168,7 +165,8 @@ if ($channel == "purse" && $storeID > 0) {
     }
             
     //add payment
-    mysql_query("INSERT INTO payment VALUES (NULL, '$pingpp_no', '$cli_ip', '$channel', '$customerID', '$storeID', '$amount', '$current_date', '$current_time', 'unpayed')");
+    $result = mysql_query("INSERT INTO payment VALUES (NULL, '$pingpp_no', '$cli_ip', '$channel', '$customerID', '$storeID', '$amount', '$current_date', '$current_time', 'unpayed')");
+    mysql_free_result($result);
     
     $amt_in_cent = intval($amount * 100);
     PingPP::setApiKey($key);
@@ -179,7 +177,6 @@ if ($channel == "purse" && $storeID > 0) {
             "amount"    => $amt_in_cent,
             "order_no"  => $pingpp_no,
             "currency"  => "cny",
-            "extra"     => $extra,
             "channel"   => $channel,
             "client_ip" => $cli_ip,
             "app"       => array("id" => $appid)
