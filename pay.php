@@ -20,26 +20,8 @@ $uname = $input_data['username'];
 $key = 'sk_test_rrzLCSebzbT8SKiH4GX9SWH8';
 $appid = 'app_5qjfH0GKyPy5y5ar';
 
-//$extra 在渠道为 upmp_wap 和 alipay_wap 时，需要填入相应的参数，具体见技术指南。其他渠道时可以传空值也可以不传。
+//$extra 在渠道为 upmp_wap 和 alipay_wap 时，需要填入相应的参数，具体见技术指南。其他渠道时可以传空值也可以不传。 - 我们用不到
 $extra = array();
-/*
-switch ($channel) {
-    case 'alipay_wap':
-        $extra = array(
-            'success_url' => 'http://www.yourdomain.com/success',
-            'cancel_url' => 'http://www.yourdomain.com/cancel'
-        );
-        break;
-    case 'upmp_wap':
-        $extra = array(
-            'result_url' => 'http://www.yourdomain.com/result?code='
-        );
-        break;
-    default:
-        $extra = null;
-        break;
-}
- */
 
 $con = mysql_connect("localhost", "root", "123456");
 mysql_select_db("order");
@@ -137,7 +119,7 @@ if ($channel == "purse" && $storeID > 0) {
     
     //8位补齐
     if (strlen($pingpp_no) < 32) {
-        $pingpp_no = str_pad($pingpp_no, 32 - strlen($pingpp_no), '0', STR_PAD_LEFT);
+        $pingpp_no = str_pad($pingpp_no, 32, '0', STR_PAD_LEFT);
     }
     
     //add payment
@@ -182,9 +164,9 @@ if ($channel == "purse" && $storeID > 0) {
     
     //8位补齐
     if (strlen($pingpp_no) < 32) {
-        $pingpp_no = str_pad($pingpp_no, 32 - strlen($pingpp_no), '0', STR_PAD_LEFT);
+        $pingpp_no = str_pad($pingpp_no, 32, '0', STR_PAD_LEFT);
     }
-        
+            
     //add payment
     mysql_query("INSERT INTO payment VALUES (NULL, '$pingpp_no', '$cli_ip', '$channel', '$customerID', '$storeID', '$amount', '$current_date', '$current_time', 'unpayed')");
     
