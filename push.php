@@ -30,11 +30,11 @@ while ($row = mysql_fetch_array($result)) {
     if ($tToken == NULL || $tToken == "")
         continue;
     // Provide the Host Information.
-$tHost = 'gateway.sandbox.push.apple.com'; //gateway.push.apple.com
+$tHost = 'gateway.push.apple.com'; //gateway.push.apple.com
 $tPort = 2195;
 
 // Provide the Certificate and Key Data.
-$tCert = 'ck_dev.pem';
+$tCert = 'ck_dis.pem';
 
 // Provide the Private Key Passphrase (alternatively you can keep this secrete
 // and enter the key manually on the terminal -> remove relevant line from code).
