@@ -177,10 +177,18 @@ if ($operation == "CHANGE_NAME") {
 
         $result = mysql_query("INSERT INTO UUID_user VALUES ('$deviceID', '$userID', '$pushT')");
         mysql_free_result($result);
-
+	
+	$usernick = "";
+	$result = mysql_query("SELECT customerName FROM customers WHERE customerID='$userID'");
+        while ($row = mysql_fetch_array($result)) {
+		$usernick = $row['customerName'];
+                break;
+        }
+        mysql_free_result($result);
+	
         mysql_query("COMMIT");
 
-        echo 'OK';
+        echo 'OK_' . $usernick;
 } elseif ($operation == "GET_ID") {
 	$username = "";
 	$pushT = $_GET['push_token'];
