@@ -46,7 +46,7 @@ if ($operation == "CHANGE_NAME") {
 	 */
 	
 	srand(seed());
-	$randed = rand(0123,9876);
+	$randed = rand(1234,9876);
 	$newCode = "$randed";
 	$result = mysql_query("INSERT INTO verification_code VALUES ($ID, $newCode)");
         mysql_free_result($result);
@@ -103,7 +103,7 @@ if ($operation == "CHANGE_NAME") {
 	mysql_query("START TRANSACTION");
 
 	//insert new user
-	$result = mysql_query("INSERT INTO customers VALUES (NULL, $ID, '', '', '', '0')");
+	$result = mysql_query("INSERT INTO customers VALUES (NULL, '$ID', '', '$ID', '', '0')");
 	mysql_free_result($result);
 	
 	//get userID
@@ -114,7 +114,7 @@ if ($operation == "CHANGE_NAME") {
 	}
 	mysql_free_result($result);
 	
-	$result = mysql_query("INSERT INTO user_login VALUES ($userID, $ID, $pass)");
+	$result = mysql_query("INSERT INTO user_login VALUES ('$userID', '$ID', '$pass')");
 	mysql_free_result($result);
 	
 	//login
