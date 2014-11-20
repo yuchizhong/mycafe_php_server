@@ -10,11 +10,13 @@ $storeName = "";
 $support = "";
 $tableFlag = "";
 $black = "";
+$payOption = "";
 while ($row = mysql_fetch_array($result)) {
 	$storeName = $row['storeName'];
 	$support = $row['supportFlag'];
 	$tableFlag = $row['tableFlag'];
 	$black = $row['useBlackFont'];
+	$payOption = $row['payOption'];
 	break;
 }
 mysql_free_result($result);
@@ -37,7 +39,7 @@ if ($support == "0")
 else
 	$support = "0";
  */
-$arr = array('storeName'=>$storeName, 'beacons'=>$beacons, 'black'=>$black, 'support'=>$support, 'tableFlag'=>$tableFlag, 'menu'=>$arrlist);
+$arr = array('storeName'=>$storeName, 'beacons'=>$beacons, 'payOption'=>$payOption, 'black'=>$black, 'support'=>$support, 'tableFlag'=>$tableFlag, 'menu'=>$arrlist);
 echo json_encode($arr);
 mysql_free_result($result); 
 mysql_close($con);

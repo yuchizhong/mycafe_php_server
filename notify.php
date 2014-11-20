@@ -35,12 +35,12 @@ if($input_data['object'] == 'charge') {
     }
     
     mysql_query("UPDATE payment SET pay_status='payed' WHERE pingpp='$pingpp_no' AND client_ip='$cli_ip' AND channel='$channel' AND amount='$amount'");
-    if (storeID == 0) {
+    if ($storeID == 0) {
         //to purse
         mysql_query("UPDATE customers SET purse=purse+'$amount' WHERE customerID='$userID'");
     } else {
         //to store
-        mysql_query("UPDATE orders SET payFlag='1' WHERE paymentID='$paymentID'");
+        mysql_query("UPDATE orders SET payFlag=1 WHERE paymentID='$paymentID'");
     }
     
     echo 'success';

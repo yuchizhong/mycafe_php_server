@@ -96,7 +96,7 @@ if ($channel == "purse" && $storeID > 0) {
     //mark orders' payFlag and paymentID
     mysql_query("UPDATE orders SET payFlag=1, paymentID='$paymentID' WHERE customerID='$customerID' AND storeID='$storeID' AND payFlag=0");
     echo "OK";
-} /*else if (($channel == "alipay" || $channel == "wx" || $channel == "upmp") && $storeID > 0) {
+} else if (($channel == "alipay" || $channel == "wx" || $channel == "upmp") && $storeID > 0) {
     if (floatval($amount) <= 0) {
         mysql_query("ROLLBACK");
         mysql_close($con);
@@ -122,6 +122,13 @@ if ($channel == "purse" && $storeID > 0) {
     //add payment
     mysql_query("INSERT INTO payment VALUES (NULL, '$pingpp_no', '$cli_ip', '$channel', '$customerID', '$storeID', '$amount', '$current_date', '$current_time', 'unpayed')");
     
+    $result = mysql_query("SELECT MAX(paymentID) FROM payment");
+    while ($row = mysql_fetch_array($result)) { 
+        $paymentID = intval($row["MAX(paymentID)"]);
+        break;
+    }
+    mysql_free_result($result);
+    
     //update orders' paymentID, but not payFlag
     $result = mysql_query("UPDATE orders SET paymentID='$paymentID' WHERE customerID='$customerID' AND storeID='$storeID' AND payFlag=0");
     mysql_free_result($result);
@@ -141,7 +148,7 @@ if ($channel == "purse" && $storeID > 0) {
     )
     );
     echo $ch;
-} */else if (($channel == "alipay" || $channel == "wx" || $channel == "upmp") && $storeID == 0) { // go to purse
+} else if (($channel == "alipay" || $channel == "wx" || $channel == "upmp") && $storeID == 0) { // go to purse
     if (floatval($amount) <= 0) {
         mysql_query("ROLLBACK");
         mysql_close($con);
