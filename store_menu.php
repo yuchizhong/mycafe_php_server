@@ -1,4 +1,28 @@
-<?php 
+<?php
+
+function setup_wifi($storeID, $ssid, $pass) {
+	if (!is_dir('images/store' . $storeID))
+		mkdir('images/store' . $storeID, 0777, true);
+
+	if ($ssid == NULL || $ssid == "")
+		return false;
+	
+	$path = 'images/store' . $storeID . '/wifi.mobileconfig';
+	if (file_exists($path)) //already exist
+		return true;
+
+	$content = @file_get_contents('wifi.mobileconfig');
+	if(!$content)
+		return false;
+
+	$content = str_replace('ssidssidssid', $ssid, $content);
+	$content = str_replace('passpasspass', $pass, $content);
+    
+	return file_put_contents($path, $content) ? true : false;
+}
+
+
+
 $id = $_GET["id"];
 
 $con = mysql_connect("localhost", "root", "123456");
@@ -11,12 +35,16 @@ $support = "";
 $tableFlag = "";
 $black = "";
 $payOption = "";
+$wifi_ssid = "";
+$wifi_pass = "";
 while ($row = mysql_fetch_array($result)) {
 	$storeName = $row['storeName'];
 	$support = $row['supportFlag'];
 	$tableFlag = $row['tableFlag'];
 	$black = $row['useBlackFont'];
 	$payOption = $row['payOption'];
+	$wifi_ssid = $row['wifiSSID'];
+	$wifi_pass = $row['wifiPASS'];
 	break;
 }
 mysql_free_result($result);
@@ -33,13 +61,12 @@ while ($row = mysql_fetch_array($result)) {
 	$temp = array('dishID'=>$row['dishID'], 'image'=>$row['picPath'], 'name'=>$row['dishName'], 'catagory'=>$row['categoryName'], 'price'=>$row['price'], 'description'=>$row['description'], 'note'=>$row['note'], 'addition'=>$row['orderCount'] . ":" . $row['upCount']);
 	array_push($arrlist, $temp);
 }
-/*
-if ($support == "0")
-	$support = "1";
-else
-	$support = "0";
- */
-$arr = array('storeName'=>$storeName, 'beacons'=>$beacons, 'payOption'=>$payOption, 'black'=>$black, 'support'=>$support, 'tableFlag'=>$tableFlag, 'menu'=>$arrlist);
+
+$wifi_ok = '0';
+if (setup_wifi($id, $ssid, $pass))
+	$wifi_ok = '1';
+
+$arr = array('storeName'=>$storeName, 'beacons'=>$beacons, 'wifi'=>$wifi_ok, 'payOption'=>$payOption, 'black'=>$black, 'support'=>$support, 'tableFlag'=>$tableFlag, 'menu'=>$arrlist);
 echo json_encode($arr);
 mysql_free_result($result); 
 mysql_close($con);
