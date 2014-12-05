@@ -1,5 +1,5 @@
 <?php
-
+/*
 function setup_wifi($storeID, $ssid, $pass) {
 	if (!is_dir('images/store' . $storeID))
 		mkdir('images/store' . $storeID, 0777, true);
@@ -21,7 +21,7 @@ function setup_wifi($storeID, $ssid, $pass) {
 	return file_put_contents($path, $content) ? true : false;
 }
 
-
+*/
 
 $id = $_GET["id"];
 
@@ -35,16 +35,18 @@ $support = "";
 $tableFlag = "";
 $black = "";
 $payOption = "";
-$wifi_ssid = "";
-$wifi_pass = "";
+$wifi_ok = '0';
+//$wifi_ssid = "";
+//$wifi_pass = "";
 while ($row = mysql_fetch_array($result)) {
 	$storeName = $row['storeName'];
 	$support = $row['supportFlag'];
 	$tableFlag = $row['tableFlag'];
 	$black = $row['useBlackFont'];
 	$payOption = $row['payOption'];
-	$wifi_ssid = $row['wifiSSID'];
-	$wifi_pass = $row['wifiPASS'];
+	$wifi_ok = $row['wifi'];
+//	$wifi_ssid = $row['wifiSSID'];
+//	$wifi_pass = $row['wifiPASS'];
 	break;
 }
 mysql_free_result($result);
@@ -62,9 +64,10 @@ while ($row = mysql_fetch_array($result)) {
 	array_push($arrlist, $temp);
 }
 
-$wifi_ok = '0';
+/*
 if (setup_wifi($id, $ssid, $pass))
 	$wifi_ok = '1';
+*/
 
 $arr = array('storeName'=>$storeName, 'beacons'=>$beacons, 'wifi'=>$wifi_ok, 'payOption'=>$payOption, 'black'=>$black, 'support'=>$support, 'tableFlag'=>$tableFlag, 'menu'=>$arrlist);
 echo json_encode($arr);
