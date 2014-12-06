@@ -62,7 +62,7 @@ if ($mall == "credit") {
     
     if ($creditsAvailable > $creditsNeeded && $creditsNeeded != -1) {
         //insert
-        mysql_query("INSERT INTO creditTransaction VALUES (NULL, '$storeID', '$itemID', '$customerID', '$current_date', '$current_time', '1', '0')");
+        mysql_query("INSERT INTO creditTransaction VALUES (NULL, '$storeID', '$itemID', '$customerID', '$current_date', '$current_time', '1')");
         
         //get transaction ID
         $result = mysql_query("SELECT MAX(transaction_id) FROM creditTransaction");
