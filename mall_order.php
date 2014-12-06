@@ -11,9 +11,9 @@ if (get_magic_quotes_gpc()) {
 }
 $json = json_decode($raw, true);
 $mall = $json["mall"];
-$itemID = $json["itemID"];
-$storeID = $json["storeID"];
-$customer = $json["customer"];
+$itemID = $json["item_id"];
+$storeID = $json["store_id"];
+$customer = $json["user_name"];
 $customerID = 0;
 $error = "";
 $ok_msg = "OK";
@@ -43,7 +43,7 @@ if ($mall == "credit") {
     $creditsNeeded = -1;
     $chainID = -1;
     
-    $q = "SELECT credit, chain_id FROM chain, stores, credit WHERE credit.user_id='$customerID' AND stores.storeID='$storeID' AND stores.chain_id=credit.chain_id";
+    $q = "SELECT credit, chain.chain_id FROM chain, stores, credit WHERE credit.user_id='$customerID' AND stores.storeID='$storeID' AND stores.chain_id=credit.chain_id";
     $result = mysql_query($q);
     while ($row = mysql_fetch_array($result)) {
         $creditsAvailable = intval($row['credit']);
