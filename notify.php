@@ -19,11 +19,13 @@ if($input_data['object'] == 'charge') {
     $storeID = 0;
     $userID = 0;
     $paymentID = 0;
+    $mall = "normal";
     while ($row = mysql_fetch_array($result)) {
     	$rowCount++;
         $paymentID = intval($row['paymentID']);
         $storeID = intval($row['storeID']);
         $userID = intval($row['userID']);
+        $mall = $row['mall'];
     }
     mysql_free_result($result);
     
@@ -34,13 +36,18 @@ if($input_data['object'] == 'charge') {
         exit();
     }
     
-    mysql_query("UPDATE payment SET pay_status='payed' WHERE pingpp='$pingpp_no' AND client_ip='$cli_ip' AND channel='$channel' AND amount='$amount'");
-    if ($storeID == 0) {
-        //to purse
-        mysql_query("UPDATE customers SET purse=purse+'$amount' WHERE customerID='$userID'");
-    } else {
-        //to store
-        mysql_query("UPDATE orders SET payFlag=1 WHERE paymentID='$paymentID'");
+    if ($mall == "normal") {
+        mysql_query("UPDATE payment SET pay_status='payed' WHERE pingpp='$pingpp_no' AND client_ip='$cli_ip' AND channel='$channel' AND amount='$amount'");
+        if ($storeID == 0) {
+            //to purse
+            mysql_query("UPDATE customers SET purse=purse+'$amount' WHERE customerID='$userID'");
+        } else {
+            //to store
+            mysql_query("UPDATE orders SET payFlag=1 WHERE paymentID='$paymentID'");
+        }
+    } elseif ($mall == "cash") {
+        mysql_query("UPDATE payment SET pay_status='payed' WHERE pingpp='$pingpp_no' AND client_ip='$cli_ip' AND channel='$channel' AND amount='$amount'");
+        mysql_query("UPDATE cashTransaction SET status=1 WHERE paymentID='$paymentID'");
     }
     
     echo 'success';

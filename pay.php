@@ -12,6 +12,8 @@ $amount = $input_data['amount'];
 
 $channel = strtolower($input_data['channel']);
 $storeID = intval($input_data['storeID']);
+if ($mall == "cash")
+    $storeID = $input_data['store_id'];
 if ($storeID < 0 || $amount < 0) {
     echo 'ERROR_PARA_NEGATIVE';
     exit();
@@ -75,7 +77,6 @@ $current_time = date("H:i"); //add s if need seconds
 
 if ($mall == "cash" && $channel == "purse") {
     $ctransaction_id = $input_data['transaction_id'];
-    $storeID = $input_data['store_id'];
     $amount = $input_data['price'];
     
     //check and update remaining money
@@ -108,7 +109,60 @@ if ($mall == "cash" && $channel == "purse") {
     mysql_query("UPDATE cashTransaction SET status=1, paymentID='$paymentID' WHERE transaction_id='$ctransaction_id'");
     echo "OK";
 } elseif ($mall == "cash" && ($channel == "alipay" || $channel == "wx" || $channel == "upmp")) {
+    $ctransaction_id = $input_data['transaction_id'];
+    $amount = $input_data['price'];
     
+    if (floatval($amount) <= 0) {
+        mysql_query("ROLLBACK");
+        mysql_close($con);
+        echo 'ERROR_ZERO';
+        exit();
+    }
+    $pingpp_max = "";
+    $result = mysql_query("SELECT MAX(pingpp) FROM payment");
+    while ($row = mysql_fetch_array($result)) { 
+        $pingpp_max = strval($row["MAX(pingpp)"]);
+        break;
+    }
+    mysql_free_result($result);
+    
+    $pingpp_max_no = base_convert($pingpp_max, 36, 10) + 1;
+    $pingpp_no = base_convert(strval($pingpp_max_no), 10, 36);
+    
+    //8位补齐
+    if (strlen($pingpp_no) < 32) {
+        $pingpp_no = str_pad($pingpp_no, 32, '0', STR_PAD_LEFT);
+    }
+    
+    //add payment
+    mysql_query("INSERT INTO payment VALUES (NULL, 'cash', '$pingpp_no', '$cli_ip', '$channel', '$customerID', '$storeID', '$amount', '$current_date', '$current_time', 'unpayed')");
+    
+    $result = mysql_query("SELECT MAX(paymentID) FROM payment");
+    while ($row = mysql_fetch_array($result)) { 
+        $paymentID = intval($row["MAX(paymentID)"]);
+        break;
+    }
+    mysql_free_result($result);
+    
+    //update orders' paymentID, but not payFlag
+    $result = mysql_query("UPDATE cashTransaction SET paymentID='$paymentID' WHERE transaction_id='$ctransaction_id'");
+    mysql_free_result($result);
+    
+    $amt_in_cent = intval($amount * 100);
+    PingPP::setApiKey($key);
+    $ch = PingPP_Charge::create(
+        array(
+            "subject"   => "UniCafe商城消费",
+            "body"      => "共计￥" . $amount . "（店名：" . $storeName . ",账号：" . $uname . "）",
+            "amount"    => $amt_in_cent,
+            "order_no"  => $pingpp_no,
+            "currency"  => "cny",
+            "channel"   => $channel,
+            "client_ip" => $_SERVER["REMOTE_ADDR"],
+            "app"       => array("id" => $appid)
+    )
+    );
+    echo $ch;
 } elseif ($mall == "normal" && $channel == "purse" && $storeID > 0) {
     //check and update remaining money
     $rem = 0.0;
@@ -180,7 +234,7 @@ if ($mall == "cash" && $channel == "purse") {
     PingPP::setApiKey($key);
     $ch = PingPP_Charge::create(
         array(
-            "subject"   => "爱易点买单",
+            "subject"   => "UniCafe买单",
             "body"      => "共计￥" . $amount . "（店名：" . $storeName . ",账号：" . $uname . "）",
             "amount"    => $amt_in_cent,
             "order_no"  => $pingpp_no,
@@ -222,7 +276,7 @@ if ($mall == "cash" && $channel == "purse") {
     PingPP::setApiKey($key);
     $ch = PingPP_Charge::create(
         array(
-            "subject"   => "爱易点钱包充值",
+            "subject"   => "UniCafe钱包充值",
             "body"      => "充值￥" . $amount . "（账号：" . $uname . "）",
             "amount"    => $amt_in_cent,
             "order_no"  => $pingpp_no,
