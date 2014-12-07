@@ -80,22 +80,18 @@ if ($mall == "credit") {
         $error = "ERROR_ISF";
     }
 } elseif ($mall == "cash") {
-    /*
     //insert new transaction
-    mysql_query("INSERT INTO orders VALUES (NULL, '$id', '$current_date', '$current_time', '$tableID', '$customerID', '0', '0', '0', '$total', '0')");
+    mysql_query("INSERT INTO cashTransaction VALUES (NULL, '$storeID', '$itemID', '$customerID', '$current_date', '$current_time', '0', '0')");
     //get id for payment
-    $q = "SELECT MAX(orderID) FROM orders WHERE storeID='$id' AND customerID='$customerID'";
+    $q = "SELECT MAX(transaction_id) FROM cashTransaction";
     $result = mysql_query($q);
     $transacID = "";
     while ($row = mysql_fetch_array($result)) {
-       $transacID = $row["MAX(orderID)"];
+       $transacID = $row["MAX(transaction_id)"];
        break;
     }
     mysql_free_result($result);
     $ok_msg = "OK_" . $transacID;
-    */
-    
-    $error = "ERROR_MALL";
 } elseif ($mall == "activity") {
     
     $error = "ERROR_MALL";
