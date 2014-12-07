@@ -4,6 +4,7 @@ $city = $_GET["city"];
 $district = $_GET["district"];
 $lon = $_GET["longitude"];
 $lat = $_GET["latitude"];
+$mall = $_GET["mall"];
 
 $con = mysql_connect("localhost", "root", "123456");
 mysql_select_db("order");
@@ -17,7 +18,11 @@ mysql_query("set names utf8");
 //elseif ($district === 'ALL')
 //	$q = "SELECT * FROM all_stores WHERE province='$province' AND city='$city' ORDER BY matchingStore DESC";
 
-$q = "SELECT * FROM stores WHERE storeID IS NOT NULL AND addr IS NOT NULL ORDER BY ACOS(SIN(('$lat' * 3.1415) / 180 ) *SIN((latitude * 3.1415) / 180 ) + COS(('$lat' * 3.1415) / 180 ) * COS((latitude * 3.1415) / 180 ) *COS(('$lon' * 3.1415) / 180 - (longitude * 3.1415) / 180 ) ) * 6380 ASC, storeID DESC LIMIT 20";
+$q = "SELECT * FROM stores WHERE storeName IS NOT NULL AND addr IS NOT NULL ORDER BY ACOS(SIN(('$lat' * 3.1415) / 180 ) *SIN((latitude * 3.1415) / 180 ) + COS(('$lat' * 3.1415) / 180 ) * COS((latitude * 3.1415) / 180 ) *COS(('$lon' * 3.1415) / 180 - (longitude * 3.1415) / 180 ) ) * 6380 ASC, storeID DESC LIMIT 20";
+if ($mall != null && $mall != "") {
+	$condition = "have_" . $mall . "=1";
+	$q = "SELECT * FROM stores WHERE storeName IS NOT NULL AND $condition AND addr IS NOT NULL ORDER BY ACOS(SIN(('$lat' * 3.1415) / 180 ) *SIN((latitude * 3.1415) / 180 ) + COS(('$lat' * 3.1415) / 180 ) * COS((latitude * 3.1415) / 180 ) *COS(('$lon' * 3.1415) / 180 - (longitude * 3.1415) / 180 ) ) * 6380 ASC, storeID DESC LIMIT 20";
+}
 $result = mysql_query($q);
 $arrlist = array();
 while ($row = mysql_fetch_array($result)) {
