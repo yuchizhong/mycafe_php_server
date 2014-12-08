@@ -60,7 +60,11 @@ mysql_free_result($result);
 $result = mysql_query("SELECT * FROM dishes, dishCategory WHERE dishes.storeID='$id' AND dishes.storeID=dishCategory.storeID AND dishes.catagory=dishCategory.categoryID ORDER BY categoryID ASC, dishID ASC");
 $arrlist = array();
 while ($row = mysql_fetch_array($result)) {
-	$temp = array('dishID'=>$row['dishID'], 'image'=>$row['picPath'], 'name'=>$row['dishName'], 'catagory'=>$row['categoryName'], 'price'=>$row['price'], 'description'=>$row['description'], 'note'=>$row['note'], 'addition'=>$row['orderCount'] . ":" . $row['upCount']);
+	$scoreable = $row['bscorable'];
+	$score = 0;
+	if ($scoreable == 1)
+		$score = $row['score'];
+	$temp = array('dishID'=>$row['dishID'], 'image'=>$row['picPath'], 'name'=>$row['dishName'], 'catagory'=>$row['categoryName'], 'price'=>$row['price'], 'description'=>$row['description'], 'note'=>$row['note'], 'score'=>strval($score), 'addition'=>$row['orderCount'] . ":" . $row['upCount']);
 	array_push($arrlist, $temp);
 }
 

@@ -28,6 +28,7 @@ if($input_data['object'] == 'charge') {
         $mall = $row['mall'];
     }
     mysql_free_result($result);
+    $customerID = $userID;
     
     if ($rowCount != 1) {
         mysql_query("ROLLBACK");
@@ -45,6 +46,58 @@ if($input_data['object'] == 'charge') {
             //to store
             mysql_query("UPDATE orders SET payFlag=1 WHERE paymentID='$paymentID'");
         }
+        
+        //add credit///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        $totalCredit = 0;
+        $result = mysql_query("SELECT totalCredit FROM orders WHERE paymentID='$paymentID'");
+        while ($row = mysql_fetch_array($result)) {
+            $totalCredit += intval($row["totalCredit"]);
+        }
+        mysql_free_result($result);
+        if ($totalCredit > 0) {
+        //get chain_id by storeID
+        $chainID = 0;
+        $result = mysql_query("SELECT chain_id FROM stores WHERE storeID='$storeID'");
+        while ($row = mysql_fetch_array($result)) {
+            $chainID = intval($row["chain_id"]);
+            break;
+        }
+        mysql_free_result($result);
+        //insert into credit if not exist
+        $creditExist = false;
+        $result = mysql_query("SELECT * FROM credit WHERE user_id='$customerID' AND chain_id='$chainID'");
+        while ($row = mysql_fetch_array($result)) {
+            $creditExist = true;
+            break;
+        }
+        mysql_free_result($result);
+        if (!$creditExist) {
+            mysql_query("INSERT INTO credit VALUES ('$chainID', '$customerID', '0', '0', '0')");
+        }
+        
+        mysql_query("UPDATE credit SET credit=credit+'$totalCredit', accumulated_credit=accumulated_credit+'$totalCredit' WHERE user_id='$customerID' AND chain_id='$chainID'");
+        
+        //update member_level
+        $memlv = 0;
+        $acccredit = 0;
+        $result = mysql_query("SELECT accumulated_credit FROM credit WHERE user_id='$customerID' AND chain_id='$chainID'");
+        while ($row = mysql_fetch_array($result)) {
+            $acccredit = intval($row["accumulated_credit"]);
+            break;
+        }
+        mysql_free_result($result);
+        
+        //calculate level
+        $result = mysql_query("SELECT MAX(member_level) FROM creditLevel WHERE chain_id='$chainID' AND level_credits<='$acccredit'");
+        while ($row = mysql_fetch_array($result)) {
+            $memlv = intval($row["MAX(member_level)"]);
+            break;
+        }
+        mysql_free_result($result);
+        
+        mysql_query("UPDATE credit SET member_level='$memlv' WHERE user_id='$customerID' AND chain_id='$chainID'");
+        }
+        //add credit end///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     } elseif ($mall == "cash") {
         mysql_query("UPDATE payment SET pay_status='payed' WHERE pingpp='$pingpp_no' AND client_ip='$cli_ip' AND channel='$channel' AND amount='$amount'");
         mysql_query("UPDATE cashTransaction SET status=1 WHERE paymentID='$paymentID'");

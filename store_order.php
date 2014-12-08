@@ -23,6 +23,7 @@ mysql_free_result($result);
 
 $arr = $json["order"];
 $total = $json["total"];
+$credit = $json["credit"];
 $tableID = $json["table"];
 
 //get time
@@ -33,7 +34,7 @@ mysql_query("START TRANSACTION");
 
 mysql_query("UPDATE orders SET payFlag=1, orderFlag=4 WHERE payFlag=0 AND orderFlag=0");
 
-$q = "INSERT INTO orders VALUES (NULL, '$id', '$current_date', '$current_time', '$tableID', '$customerID', '0', '0', '0', '$total', '0')";
+$q = "INSERT INTO orders VALUES (NULL, '$id', '$current_date', '$current_time', '$tableID', '$customerID', '0', '0', '0', '$total', '$credit', '0')";
 $result = mysql_query($q);
 mysql_free_result($result);
 
