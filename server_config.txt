@@ -1,1 +1,1 @@
-link=http://182.92.130.225;version=1.0;force_update=YES
+link=http://123.57.135.129;version=1.0;force_update=YES

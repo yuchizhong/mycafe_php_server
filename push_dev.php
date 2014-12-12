@@ -1,16 +1,40 @@
 <?php
-$debug_env = false;
+$msg = $_GET['message'];
+$userID = $_GET['customerID'];
+$user = $_GET['user'];
+$sok = true;
 
-function send_push($msg, $tToken) {
-$tHost = 'gateway.push.apple.com'; //gateway.push.apple.com
-if ($debug_env)
-    $tHost = 'gateway.sandbox.push.apple.com';
+$con = mysql_connect("localhost", "root", "123456");
+mysql_select_db("order");
+mysql_query("set names utf8");
+
+if ($userID == NULL || $userID == "") {
+    //get userID from user
+    $result = mysql_query("SELECT userID FROM user_login WHERE username='$user'");
+    while ($row = mysql_fetch_array($result)) { 
+    	$userID = $row["userID"];
+    	break;
+    }
+    mysql_free_result($result);
+}
+
+$current_date = date("Ymd");
+$current_time = date("H:i"); //add s if need seconds
+mysql_query("INSERT INTO notifications VALUES ('$userID', '$current_date', '$current_time', '$msg', '0')");
+
+$result = mysql_query("SELECT push_token FROM UUID_user WHERE userID='$userID'");
+while ($row = mysql_fetch_array($result)) {
+    // Provide the Device Identifier (Ensure that the Identifier does not have spaces in it).
+    // Replace this token with the token of the iOS device that is to receive the notification.
+    $tToken = $row["push_token"];
+    if ($tToken == NULL || $tToken == "")
+        continue;
+    // Provide the Host Information.
+$tHost = 'gateway.sandbox.push.apple.com'; //gateway.push.apple.com
 $tPort = 2195;
 
 // Provide the Certificate and Key Data.
-$tCert = 'ck_dis.pem';
-if ($debug_env)
-    $tCert = 'ck_dev.pem';
+$tCert = 'ck_dev.pem';
 
 // Provide the Private Key Passphrase (alternatively you can keep this secrete
 // and enter the key manually on the terminal -> remove relevant line from code).
@@ -48,8 +72,6 @@ stream_context_set_option ($tContext, 'ssl', 'local_cert', $tCert);
 stream_context_set_option ($tContext, 'ssl', 'passphrase', $tPassphrase);
 
 // Open the Connection to the APNS Server.
-$error = "";
-$errstr = "";
 $tSocket = stream_socket_client ('ssl://'.$tHost.':'.$tPort, $error, $errstr, 30, STREAM_CLIENT_CONNECT|STREAM_CLIENT_PERSISTENT, $tContext);
 
 // Check if we were able to open a socket.
@@ -61,12 +83,18 @@ $tMsg = chr (0) . chr (0) . chr (32) . pack ('H*', $tToken) . pack ('n', strlen 
 
 // Send the Notification to the Server.
 $tResult = fwrite ($tSocket, $tMsg, strlen ($tMsg));
+
 if (!$tResult) {
-    fclose ($tSocket);
-    return false;
+    $sok = false;
+    echo 'ERROR';
+	break;
 }
+
 // Close the Connection to the Server.
 fclose ($tSocket);
-return true;
 }
+if ($sok)
+	echo 'OK';
+mysql_free_result($result);
+mysql_close($con);
 ?>

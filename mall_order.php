@@ -12,9 +12,19 @@ if (get_magic_quotes_gpc()) {
 $json = json_decode($raw, true);
 $mall = $json["mall"];
 $itemID = $json["item_id"];
+$activityID = $json["activity_id"];
 $storeID = $json["store_id"];
 $customer = $json["user_name"];
 $customerID = 0;
+$price = floatval($json["price"]);
+$platform = $json["platform"];
+if ($platform == NULL || $platform == "") {
+	$platform = "0";
+}
+$tableID = $json["tableID"];
+if ($tableID == NULL || $tableID == "") {
+        $tableID = "0";
+}
 $error = "";
 $ok_msg = "OK";
 //get customerID by customer
@@ -62,7 +72,7 @@ if ($mall == "credit") {
     
     if ($creditsAvailable > $creditsNeeded && $creditsNeeded != -1) {
         //insert
-        mysql_query("INSERT INTO creditTransaction VALUES (NULL, '$storeID', '$itemID', '$customerID', '$current_date', '$current_time', '1')");
+        mysql_query("INSERT INTO creditTransaction VALUES (NULL, '$storeID', '$itemID', '$customerID', '$current_date', '$current_time', '1', '0')");
         
         //get transaction ID
         $result = mysql_query("SELECT MAX(transaction_id) FROM creditTransaction");
@@ -81,7 +91,7 @@ if ($mall == "credit") {
     }
 } elseif ($mall == "cash") {
     //insert new transaction
-    mysql_query("INSERT INTO cashTransaction VALUES (NULL, '$storeID', '$itemID', '$customerID', '$current_date', '$current_time', '0', '0')");
+    mysql_query("INSERT INTO cashTransaction VALUES (NULL, '$storeID', '$itemID', '$customerID', '$current_date', '$current_time', '0', '0', '0', '$tableID', '$platform')");
     //get id for payment
     $q = "SELECT MAX(transaction_id) FROM cashTransaction";
     $result = mysql_query($q);
@@ -93,8 +103,64 @@ if ($mall == "credit") {
     mysql_free_result($result);
     $ok_msg = "OK_" . $transacID;
 } elseif ($mall == "activity") {
-    
-    $error = "ERROR_MALL";
+    //check people
+    $max = 0;
+    $enrolled = 0;
+    $ac_date = "";
+    $ac_time = "";
+    $ac_price = 0.0;
+    $alreadyIN = false;
+    $result = mysql_query("SELECT * FROM activity WHERE store_id='$storeID' AND activity_id='$activityID'");
+    while ($row = mysql_fetch_array($result)) {
+        $max = intval($row['max']);
+	$enrolled = intval($row['enrolled']);
+	$ac_date = $row['date'];
+    	$ac_time = $row['time'];
+   	$ac_price = floatval($row['price']);
+	break;
+    }
+    mysql_free_result($result);
+
+   $result = mysql_query("SELECT * FROM activityTransaction WHERE store_id='$storeID' AND activity_id='$activityID' AND user_id='$customerID' AND status=1");
+    while ($row = mysql_fetch_array($result)) {
+        $alreadyIN = true;
+	break;
+    }
+    mysql_free_result($result);
+
+    if ($ac_price != $price) {
+	$error = "ERROR_PRICE";
+    } elseif ($max != 0 && $enrolled >= $max) {
+	$error = "ERROR_FULL";
+    } elseif ($alreadyIN) {
+        $error = "ERROR_ALREADY_IN";
+    } elseif ($ac_date < $current_date) {
+    	//check date and time
+	$error = "ERROR_TIME";
+    } elseif ($ac_date == $current_date && $ac_time < $current_time) {
+        //check date and time
+        $error = "ERROR_TIME";
+    } else {
+	//write to DB, if free, write status to 1 and inc enrolled
+	if ($ac_price == 0.0) {
+	    //insert new transaction
+	    mysql_query("INSERT INTO activityTransaction VALUES (NULL, '$storeID', '$activityID', '$customerID', '$current_date', '$current_time', '1', '0', '0')");
+	    //increment enrolled number
+            mysql_query("UPDATE activity SET enrolled=enrolled+1 WHERE store_id='$storeID' AND activity_id='$activityID'");
+  	} else {
+	    mysql_query("INSERT INTO activityTransaction VALUES (NULL, '$storeID', '$activityID', '$customerID', '$current_date', '$current_time', '0', '0', '0')");
+	}
+   	 //get id for payment
+   	 $q = "SELECT MAX(transaction_id) FROM activityTransaction";
+   	 $result = mysql_query($q);
+   	 $transacID = "";
+   	 while ($row = mysql_fetch_array($result)) {
+      		 $transacID = $row["MAX(transaction_id)"];
+       	         break;
+    	}
+    	mysql_free_result($result);
+    	$ok_msg = "OK_" . $transacID;
+    }
 } elseif ($mall == "groupon") {
     
     $error = "ERROR_MALL";

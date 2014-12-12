@@ -25,6 +25,10 @@ $arr = $json["order"];
 $total = $json["total"];
 $credit = $json["credit"];
 $tableID = $json["table"];
+$platform = $json["platform"];
+if ($platform == NULL || $platform == "") {
+	$platform == "0";
+}
 
 //get time
 $current_date = date("Ymd");
@@ -32,9 +36,9 @@ $current_time = date("H:i"); //add s if need seconds
 
 mysql_query("START TRANSACTION");
 
-mysql_query("UPDATE orders SET payFlag=1, orderFlag=4 WHERE payFlag=0 AND orderFlag=0");
+mysql_query("UPDATE orders SET orderFlag=3 WHERE payFlag=0 AND orderFlag=0");
 
-$q = "INSERT INTO orders VALUES (NULL, '$id', '$current_date', '$current_time', '$tableID', '$customerID', '0', '0', '0', '$total', '$credit', '0')";
+$q = "INSERT INTO orders VALUES (NULL, '$id', '$current_date', '$current_time', '$tableID', '$customerID', '0', '0', '0', '$total', '$credit', '0', '$platform')";
 $result = mysql_query($q);
 mysql_free_result($result);
 
@@ -61,7 +65,7 @@ foreach ($arr as $value) {
 }
 
 $totalPrice = 0.0;
-$result = mysql_query("SELECT SUM(totalPrice) FROM orders WHERE storeID='$id' AND customerID='$customerID' AND payFlag=0");
+$result = mysql_query("SELECT SUM(totalPrice) FROM orders WHERE storeID='$id' AND customerID='$customerID' AND payFlag=0 AND orderFlag=0");
 while ($row = mysql_fetch_array($result)) {
     $totalPrice = $row["SUM(totalPrice)"];
     break;

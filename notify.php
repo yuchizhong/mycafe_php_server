@@ -1,4 +1,5 @@
 <?php
+require(dirname(__FILE__) . '/encryption.php');
 $input_data = json_decode(file_get_contents("php://input"), true);
 
 $con = mysql_connect("localhost", "root", "123456");
@@ -41,7 +42,15 @@ if($input_data['object'] == 'charge') {
         mysql_query("UPDATE payment SET pay_status='payed' WHERE pingpp='$pingpp_no' AND client_ip='$cli_ip' AND channel='$channel' AND amount='$amount'");
         if ($storeID == 0) {
             //to purse
-            mysql_query("UPDATE customers SET purse=purse+'$amount' WHERE customerID='$userID'");
+	    $pAmount = "";
+	    $result = mysql_query("SELECT purse FROM customers WHERE customerID='$userID'");
+    	while ($row = mysql_fetch_array($result)) {
+		$pAmount = $row['purse'];
+		break;
+    	}
+    	mysql_free_result($result);
+	$pAmount = enc(strval((dec($pAmount) + $amount)));
+            mysql_query("UPDATE customers SET purse='$pAmount' WHERE customerID='$userID'");
         } else {
             //to store
             mysql_query("UPDATE orders SET payFlag=1 WHERE paymentID='$paymentID'");
@@ -101,6 +110,19 @@ if($input_data['object'] == 'charge') {
     } elseif ($mall == "cash") {
         mysql_query("UPDATE payment SET pay_status='payed' WHERE pingpp='$pingpp_no' AND client_ip='$cli_ip' AND channel='$channel' AND amount='$amount'");
         mysql_query("UPDATE cashTransaction SET status=1 WHERE paymentID='$paymentID'");
+    } elseif ($mall == "activity") {
+        mysql_query("UPDATE payment SET pay_status='payed' WHERE pingpp='$pingpp_no' AND client_ip='$cli_ip' AND channel='$channel' AND amount='$amount'");
+        mysql_query("UPDATE activityTransaction SET status=1 WHERE paymentID='$paymentID'");
+        //increment enrolled number
+        //get activity_id
+	$activityID = 0;
+	$result = mysql_query("SELECT activity_id FROM activityTransaction WHERE paymentID='$paymentID'");
+        while ($row = mysql_fetch_array($result)) {
+            $activityID = intval($row['activity_id']);
+	    break;
+        }
+        mysql_free_result($result);
+        mysql_query("UPDATE activity SET enrolled=enrolled+1 WHERE store_id='$storeID' AND activity_id='$activityID'");
     }
     
     echo 'success';

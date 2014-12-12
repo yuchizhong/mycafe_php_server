@@ -1,4 +1,5 @@
-<?php 
+<?php
+require(dirname(__FILE__) . '/encryption.php');
 
 function seed() {
 	list($msec, $sec) = explode(' ', microtime());
@@ -7,6 +8,10 @@ function seed() {
 
 $operation = $_GET["OPERATION"];
 $deviceID = $_GET["UUID"];
+$platform = $_GET["platform"];
+if ($platform == NULL || $platform == "") {
+	$platform = "0";
+}
 
 $con = mysql_connect("localhost", "root", "123456");
 mysql_select_db("order");
@@ -66,6 +71,7 @@ if ($operation == "CHANGE_NAME") {
 } elseif ($operation == "REGISTER") {
 	$ID = $_GET["ID"];
 	$pass = $_GET["pass"];
+	$pass = uhash($pass);
 	$verf = $_GET["verification"];
 	$pushT = $_GET['push_token'];
 	if ($pushT == NULL)
@@ -118,10 +124,10 @@ if ($operation == "CHANGE_NAME") {
 	mysql_free_result($result);
 	
 	//login
-	$result = mysql_query("DELETE FROM UUID_user WHERE UUID='$deviceID'");
+	$result = mysql_query("DELETE FROM UUID_user WHERE UUID='$deviceID' AND platform='$platform'");
 	mysql_free_result($result);
 	
-	$result = mysql_query("INSERT INTO UUID_user VALUES ('$deviceID', '$userID', '$pushT')");
+	$result = mysql_query("INSERT INTO UUID_user VALUES ('$deviceID', '$userID', '$pushT', '$platform')");
 	mysql_free_result($result);
 	
 	mysql_query("COMMIT");
@@ -130,6 +136,7 @@ if ($operation == "CHANGE_NAME") {
 } elseif ($operation == "RESET_PW") {
         $ID = $_GET["ID"];
         $pass = $_GET["pass"];
+	$pass = uhash($pass);
         $verf = $_GET["verification"];
         $pushT = $_GET['push_token'];
         if ($pushT == NULL)
@@ -172,10 +179,10 @@ if ($operation == "CHANGE_NAME") {
         mysql_free_result($result);
         
 	//login
-        $result = mysql_query("DELETE FROM UUID_user WHERE UUID='$deviceID'");
+        $result = mysql_query("DELETE FROM UUID_user WHERE UUID='$deviceID' AND platform='$platform'");
         mysql_free_result($result);
 
-        $result = mysql_query("INSERT INTO UUID_user VALUES ('$deviceID', '$userID', '$pushT')");
+        $result = mysql_query("INSERT INTO UUID_user VALUES ('$deviceID', '$userID', '$pushT', '$platform')");
         mysql_free_result($result);
 	
 	$usernick = "";
@@ -198,7 +205,7 @@ if ($operation == "CHANGE_NAME") {
 	while ($row = mysql_fetch_array($result)) { 
 		$username = $row["username"];
 		if ($pushT != "") {
-			mysql_query("UPDATE UUID_user SET push_token='$pushT' WHERE UUID='$deviceID'");
+			mysql_query("UPDATE UUID_user SET push_token='$pushT' WHERE UUID='$deviceID AND platform='$platform'");
 		}
 		break;
 	}
@@ -220,6 +227,7 @@ if ($operation == "CHANGE_NAME") {
 }  elseif ($operation == "LOGIN") {
 	$ID = $_GET["ID"];
 	$pass = $_GET["pass"];
+	$pass = uhash($pass);
 	$pushT = $_GET['push_token'];
 	if ($pushT == NULL)
 		$pushT = "";
@@ -241,10 +249,10 @@ if ($operation == "CHANGE_NAME") {
 	}
 	
 	//ensure no dulplicated row
-	$result = mysql_query("DELETE FROM UUID_user WHERE UUID='$deviceID'");
+	$result = mysql_query("DELETE FROM UUID_user WHERE UUID='$deviceID' AND platform='$platform'");
 	mysql_free_result($result);
 	
-	$result = mysql_query("INSERT INTO UUID_user VALUES ('$deviceID', '$userID', '$pushT')");
+	$result = mysql_query("INSERT INTO UUID_user VALUES ('$deviceID', '$userID', '$pushT', '$platform')");
 	mysql_free_result($result);
 	
 	//get nickname
@@ -256,7 +264,7 @@ if ($operation == "CHANGE_NAME") {
         }
         echo "OK_" . $nickname;
 } elseif ($operation == "LOGOUT") {
-	$result = mysql_query("DELETE FROM UUID_user WHERE UUID='$deviceID'");
+	$result = mysql_query("DELETE FROM UUID_user WHERE UUID='$deviceID' AND platform='$platform'");
 	mysql_free_result($result);
 	echo 'OK';
 }

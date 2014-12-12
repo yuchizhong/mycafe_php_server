@@ -1,5 +1,5 @@
 <?php
-require_once(dirname(__FILE__) . '/push_func.php');
+require(dirname(__FILE__) . '/push_func.php');
 
 $msg = $_GET['message'];
 $userID = $_GET['customerID'];

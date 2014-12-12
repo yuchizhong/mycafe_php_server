@@ -1,5 +1,6 @@
 <?php
-require_once(dirname(__FILE__) . '/lib/PingPP.php');
+require(dirname(__FILE__) . '/lib/PingPP.php');
+require(dirname(__FILE__) . '/encryption.php');
 
 $input_data = json_decode(file_get_contents("php://input"), true);
 if (empty($input_data['channel']) || empty($input_data['username'])) {
@@ -51,7 +52,9 @@ if ($storeID > 0) {
 }
 
 $cli_ip = $_SERVER["REMOTE_ADDR"];
+
 mysql_query("START TRANSACTION");
+/*
 if ($storeID > 0) {
     $amtCheck = 0.0;
     $result = mysql_query("SELECT * FROM orders WHERE customerID='$customerID' AND storeID='$storeID' AND payFlag=0");
@@ -68,6 +71,7 @@ if ($storeID > 0) {
         exit();
     }
 }
+*/
 
 //insert new transaction to DB
 $paymentID = 0;
@@ -75,15 +79,16 @@ $pingpp_no = "";
 $current_date = date("Ymd");
 $current_time = date("H:i"); //add s if need seconds
 
-if ($mall == "cash" && $channel == "purse") {
+if ($mall == "activity" && $channel == "purse") {
     $ctransaction_id = $input_data['transaction_id'];
     $amount = $input_data['price'];
+    $activity_id = $input_data['activity_id']; 
     
     //check and update remaining money
     $rem = 0.0;
     $result = mysql_query("SELECT purse FROM customers WHERE customerID='$customerID'");
     while ($row = mysql_fetch_array($result)) {
-    	$rem = floatval($row['purse']);
+        $rem = floatval(dec($row['purse']));
     }
     mysql_free_result($result);
     if ($rem < $amount) {
@@ -92,7 +97,100 @@ if ($mall == "cash" && $channel == "purse") {
         echo 'ERROR_ISF_' . $rem;
         exit();
     }
-    mysql_query("UPDATE customers SET purse=purse-'$amount' WHERE customerID='$customerID'");
+    $rem = enc(strval($rem - $amount));
+    mysql_query("UPDATE customers SET purse='$rem' WHERE customerID='$customerID'");
+
+    //add payment
+    mysql_query("INSERT INTO payment VALUES (NULL, 'activity', '', '$cli_ip', '$channel', '$customerID', '$storeID', '$amount', '$current_date', '$current_time', 'payed')");
+
+    //get paymentID
+    $result = mysql_query("SELECT MAX(paymentID) FROM payment");
+    while ($row = mysql_fetch_array($result)) {
+        $paymentID = intval($row["MAX(paymentID)"]);
+        break;
+    }
+    mysql_free_result($result);
+    
+    //mark orders' payFlag and paymentID
+    mysql_query("UPDATE activityTransaction SET status=1, paymentID='$paymentID' WHERE transaction_id='$ctransaction_id'");
+    //increment enrolled number
+    mysql_query("UPDATE activity SET enrolled=enrolled+1 WHERE store_id='$storeID' AND activity_id='$activity_id'");
+    echo "OK";
+} elseif ($mall == "activity" && ($channel == "alipay" || $channel == "wx" || $channel == "upmp")) {
+    $ctransaction_id = $input_data['transaction_id'];
+    $amount = $input_data['price'];
+    $activity_id = $input_data['activity_id'];
+    
+    if (floatval($amount) <= 0) {
+        mysql_query("ROLLBACK");
+        mysql_close($con);
+        echo 'ERROR_ZERO';
+        exit();
+    }
+    $pingpp_max = "";
+    $result = mysql_query("SELECT MAX(pingpp) FROM payment");
+    while ($row = mysql_fetch_array($result)) {
+        $pingpp_max = strval($row["MAX(pingpp)"]);
+        break;
+    }
+    mysql_free_result($result);
+
+    $pingpp_max_no = base_convert($pingpp_max, 36, 10) + 1;
+    $pingpp_no = base_convert(strval($pingpp_max_no), 10, 36);
+
+    //8位补齐
+    if (strlen($pingpp_no) < 32) {
+        $pingpp_no = str_pad($pingpp_no, 32, '0', STR_PAD_LEFT);
+    }
+
+    //add payment
+    mysql_query("INSERT INTO payment VALUES (NULL, 'activity', '$pingpp_no', '$cli_ip', '$channel', '$customerID', '$storeID', '$amount', '$current_date', '$current_time', 'unpayed')");
+
+    $result = mysql_query("SELECT MAX(paymentID) FROM payment");
+    while ($row = mysql_fetch_array($result)) {
+        $paymentID = intval($row["MAX(paymentID)"]);
+        break;
+    }
+    mysql_free_result($result);
+
+    //update orders' paymentID, but not payFlag
+    $result = mysql_query("UPDATE activityTransaction SET paymentID='$paymentID' WHERE transaction_id='$ctransaction_id'");
+    mysql_free_result($result);
+
+    $amt_in_cent = intval($amount * 100);
+    PingPP::setApiKey($key);
+    $ch = PingPP_Charge::create(
+        array(
+            "subject"   => "UniCafe活动报名费",
+            "body"      => "共计￥" . $amount . "（店名：" . $storeName . ",账号：" . $uname . "）",
+            "amount"    => $amt_in_cent,
+            "order_no"  => $pingpp_no,
+            "currency"  => "cny",
+            "channel"   => $channel,
+            "client_ip" => $_SERVER["REMOTE_ADDR"],
+            "app"       => array("id" => $appid)
+        )
+    );
+    echo $ch;
+} elseif ($mall == "cash" && $channel == "purse") {
+    $ctransaction_id = $input_data['transaction_id'];
+    $amount = $input_data['price'];
+    
+    //check and update remaining money
+    $rem = 0.0;
+    $result = mysql_query("SELECT purse FROM customers WHERE customerID='$customerID'");
+    while ($row = mysql_fetch_array($result)) {
+    	$rem = floatval(dec($row['purse']));
+    }
+    mysql_free_result($result);
+    if ($rem < $amount) {
+        mysql_query("ROLLBACK");
+        mysql_close($con);
+        echo 'ERROR_ISF_' . $rem;
+        exit();
+    }
+    $rem = enc(strval($rem - $amount));
+    mysql_query("UPDATE customers SET purse='$rem' WHERE customerID='$customerID'");
     
     //add payment
     mysql_query("INSERT INTO payment VALUES (NULL, 'cash', '', '$cli_ip', '$channel', '$customerID', '$storeID', '$amount', '$current_date', '$current_time', 'payed')");
@@ -168,7 +266,7 @@ if ($mall == "cash" && $channel == "purse") {
     $rem = 0.0;
     $result = mysql_query("SELECT purse FROM customers WHERE customerID='$customerID'");
     while ($row = mysql_fetch_array($result)) {
-    	$rem = floatval($row['purse']);
+	$rem = floatval(dec($row['purse']));
     }
     mysql_free_result($result);
     if ($rem < $amount) {
@@ -177,7 +275,8 @@ if ($mall == "cash" && $channel == "purse") {
         echo 'ERROR_ISF_' . $rem;
         exit();
     }
-    mysql_query("UPDATE customers SET purse=purse-'$amount' WHERE customerID='$customerID'");
+    $rem = enc(strval($rem - $amount));
+    mysql_query("UPDATE customers SET purse='$rem' WHERE customerID='$customerID'");
     
     //add payment
     mysql_query("INSERT INTO payment VALUES (NULL, 'normal', '', '$cli_ip', '$channel', '$customerID', '$storeID', '$amount', '$current_date', '$current_time', 'payed')");
@@ -191,9 +290,7 @@ if ($mall == "cash" && $channel == "purse") {
     mysql_free_result($result);
     
     //mark orders' payFlag and paymentID
-    mysql_query("UPDATE orders SET payFlag=1, paymentID='$paymentID' WHERE customerID='$customerID' AND storeID='$storeID' AND payFlag=0");
-    
-    
+    mysql_query("UPDATE orders SET payFlag=1, paymentID='$paymentID' WHERE customerID='$customerID' AND storeID='$storeID' AND payFlag=0 AND orderFlag=0");
     
     //add credit///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     $totalCredit = 0;
@@ -284,7 +381,7 @@ if ($mall == "cash" && $channel == "purse") {
     mysql_free_result($result);
     
     //update orders' paymentID, but not payFlag
-    $result = mysql_query("UPDATE orders SET paymentID='$paymentID' WHERE customerID='$customerID' AND storeID='$storeID' AND payFlag=0");
+    $result = mysql_query("UPDATE orders SET paymentID='$paymentID' WHERE customerID='$customerID' AND storeID='$storeID' AND payFlag=0 AND orderFlag=0");
     mysql_free_result($result);
     
     $amt_in_cent = intval($amount * 100);

@@ -64,7 +64,7 @@ while ($row = mysql_fetch_array($result)) {
 	$score = 0;
 	if ($scoreable == 1)
 		$score = $row['score'];
-	$temp = array('dishID'=>$row['dishID'], 'image'=>$row['picPath'], 'name'=>$row['dishName'], 'catagory'=>$row['categoryName'], 'price'=>$row['price'], 'description'=>$row['description'], 'note'=>$row['note'], 'score'=>strval($score), 'addition'=>$row['orderCount'] . ":" . $row['upCount']);
+	$temp = array('dishID'=>$row['dishID'], 'image'=>$row['picPath'], 'name'=>$row['dishName'], 'catagory'=>$row['categoryName'], 'price'=>$row['price'], 'originalPrice'=>$row['originalPrice'], 'description'=>$row['description'], 'note'=>$row['note'], 'score'=>strval($score), 'addition'=>$row['orderCount'] . ":" . $row['upCount']);
 	array_push($arrlist, $temp);
 }
 

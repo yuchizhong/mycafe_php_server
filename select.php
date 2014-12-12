@@ -15,6 +15,8 @@ $arrlist = array();
 while ($row = mysql_fetch_array($result)) {
     $temp = array();
     foreach ($row as $key => $value) {
+	if (is_numeric($key))
+		continue;
 	$temp[$key] = $value;
     }
     array_push($arrlist, $temp);
