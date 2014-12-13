@@ -1,7 +1,7 @@
 <?php
+function send_push($msg, $tToken) {
 $debug_env = false;
 
-function send_push($msg, $tToken) {
 $tHost = 'gateway.push.apple.com'; //gateway.push.apple.com
 if ($debug_env)
     $tHost = 'gateway.sandbox.push.apple.com';
@@ -50,7 +50,7 @@ stream_context_set_option ($tContext, 'ssl', 'passphrase', $tPassphrase);
 // Open the Connection to the APNS Server.
 $error = "";
 $errstr = "";
-$tSocket = stream_socket_client ('ssl://'.$tHost.':'.$tPort, $error, $errstr, 30, STREAM_CLIENT_CONNECT|STREAM_CLIENT_PERSISTENT, $tContext);
+$tSocket = stream_socket_client ('ssl://'.$tHost.':'.$tPort, $error, $errstr, 60, STREAM_CLIENT_CONNECT|STREAM_CLIENT_PERSISTENT, $tContext);
 
 // Check if we were able to open a socket.
 if (!$tSocket)
