@@ -65,7 +65,7 @@ while ($row = mysql_fetch_array($result)) {
 	else
 		$spt = "0";
 	 */
-	$arr = array("collected"=>$collected, "have_discount"=>$have_discount, "have_credit"=>$row['have_credit'], "have_cash"=>$row['have_cash'], "have_activiy"=>$row['have_activiy'], "have_groupon"=>$row['have_groupon'], "wifi"=>$row['wifi'], "longitude"=>$row['longitude'], "latitude"=>$row['latitude'], "support"=>$spt, 'black'=>$row['useBlackFont'], "name"=>$row['storeName'], "ID"=>$row['storeID'], "address"=>$row['addr'], "image"=>$row['logoFile'],  "rating"=>'5', "avgPrice"=>'30', "tel"=>$row['tel'], "businessTime"=>$row['businessHour'], "desp"=>$row['description']);
+	$arr = array("collected"=>$collected, "have_discount"=>$have_discount, "have_credit"=>$row['have_credit'], "have_cash"=>$row['have_cash'], "have_activiy"=>$row['have_activiy'], "have_groupon"=>$row['have_groupon'], "wifi"=>$row['wifi'], "longitude"=>$row['longitude'], "latitude"=>$row['latitude'], "support"=>$spt, 'black'=>$row['useBlackFont'], "name"=>$row['storeName'], "ID"=>$row['storeID'], "address"=>$row['addr'], "image"=>$row['logoFile'],  "rating"=>$row['rating'], "avgPrice"=>$row['averagePrice'], "tel"=>$row['tel'], "businessTime"=>$row['businessHour'], "desp"=>$row['description']);
 	array_push($arrlist, $arr);
 }
 $arr = array('list'=>$arrlist);
