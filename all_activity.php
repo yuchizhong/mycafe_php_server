@@ -4,10 +4,24 @@ $city = $_GET["city"];
 $district = $_GET["district"];
 $lon = $_GET["longitude"];
 $lat = $_GET["latitude"];
+$username = $_GET["username"];
 
-$con = mysql_connect("localhost", "root", "123456");
+$con = mysql_connect("localhost", "root", "Unicoffee168");
 mysql_select_db("order");
 mysql_query("set names utf8");
+
+$userID = "";
+
+//get userID from user
+$result = mysql_query("SELECT userID FROM user_login WHERE username='$username'");
+while ($row = mysql_fetch_array($result)) {
+    $userID = $row["userID"];
+    break;
+}
+mysql_free_result($result);
+
+if ($userID == NULL)
+        $userID = "";
 
 //$q = "SELECT * FROM all_stores WHERE province='$province' AND city='$city' AND district='$district' ORDER BY matchingStore DESC";
 //if ($province === 'ALL')
@@ -27,6 +41,27 @@ $result = mysql_query($q);
 $arrlist = array();
 while ($row = mysql_fetch_array($result)) {
     $temp = array();
+    //user has enrolled?
+    $userEnrolled = '0'; 
+    $sid = $row['store_id'];
+    $aid = $row['activity_id'];
+    $result2 = mysql_query("SELECT * FROM activityTransaction WHERE user_id='$userID' AND store_id='$sid' AND activity_id='$aid' AND status>0");
+    while ($row2 = mysql_fetch_array($result2)) {
+            $userEnrolled = '1';
+            break;
+    }
+    mysql_free_result($result2);
+    $temp['userEnrolled'] = $userEnrolled;
+
+    $collected = '0';
+    $result2 = mysql_query("SELECT * FROM collect WHERE user_id='$userID' AND store_id='$sid'");
+    while ($row2 = mysql_fetch_array($result2)) {
+            $collected = '1';
+            break;
+    }
+    mysql_free_result($result2);
+    $temp['collected'] = $collected;
+
     foreach ($row as $key => $value) {
         if (is_numeric($key))
                 continue;

@@ -7,7 +7,7 @@ $lat = $_GET["latitude"];
 $mall = $_GET["mall"];
 $username = $_GET["username"];
 
-$con = mysql_connect("localhost", "root", "123456");
+$con = mysql_connect("localhost", "root", "Unicoffee168");
 mysql_select_db("order");
 mysql_query("set names utf8");
 
@@ -65,7 +65,7 @@ while ($row = mysql_fetch_array($result)) {
 	else
 		$spt = "0";
 	 */
-	$arr = array("collected"=>$collected, "have_discount"=>$have_discount, "have_credit"=>$row['have_credit'], "have_cash"=>$row['have_cash'], "have_activiy"=>$row['have_activiy'], "have_groupon"=>$row['have_groupon'], "wifi"=>$row['wifi'], "longitude"=>$row['longitude'], "latitude"=>$row['latitude'], "support"=>$spt, 'black'=>$row['useBlackFont'], "name"=>$row['storeName'], "ID"=>$row['storeID'], "address"=>$row['addr'], "image"=>$row['logoFile'],  "rating"=>$row['rating'], "avgPrice"=>$row['averagePrice'], "tel"=>$row['tel'], "businessTime"=>$row['businessHour'], "desp"=>$row['description']);
+	$arr = array("have_homepage"=>$row['have_homepage'], "canPreorder"=>$row['canPreorder'], "collected"=>$collected, "have_discount"=>$have_discount, "have_credit"=>$row['have_credit'], "have_cash"=>$row['have_cash'], "have_activiy"=>$row['have_activiy'], "have_groupon"=>$row['have_groupon'], "wifi"=>$row['wifi'], "longitude"=>$row['longitude'], "latitude"=>$row['latitude'], "support"=>$spt, 'black'=>$row['useBlackFont'], "name"=>$row['storeName'], "ID"=>$row['storeID'], "address"=>$row['addr'], "image"=>$row['logoFile'],  "rating"=>$row['rating'], "avgPrice"=>$row['averagePrice'], "tel"=>$row['tel'], "businessTime"=>$row['businessHour'], "desp"=>$row['description']);
 	array_push($arrlist, $arr);
 }
 $arr = array('list'=>$arrlist);

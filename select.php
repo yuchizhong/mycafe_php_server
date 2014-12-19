@@ -6,7 +6,7 @@ if (substr($query, 0, 6) != "SELECT" || strstr($query, ";") != false) {
     exit(1);
 }
 
-$con = mysql_connect("localhost", "root", "123456");
+$con = mysql_connect("localhost", "root", "Unicoffee168");
 mysql_select_db("order");
 mysql_query("set names utf8");
 

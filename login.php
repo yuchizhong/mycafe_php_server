@@ -13,7 +13,7 @@ if ($platform == NULL || $platform == "") {
 	$platform = "0";
 }
 
-$con = mysql_connect("localhost", "root", "123456");
+$con = mysql_connect("localhost", "root", "Unicoffee168");
 mysql_select_db("order");
 mysql_query("set names utf8");
 
@@ -109,7 +109,7 @@ if ($operation == "CHANGE_NAME") {
 	mysql_query("START TRANSACTION");
 
 	//insert new user
-	$result = mysql_query("INSERT INTO customers VALUES (NULL, '$ID', '', '$ID', '', '0')");
+	$result = mysql_query("INSERT INTO customers VALUES (NULL, '$ID', '', '$ID', '', '827d8a45brQqjRAA')");
 	mysql_free_result($result);
 	
 	//get userID

@@ -3,7 +3,7 @@ $storeID = $_GET["storeID"];
 $tableID = $_GET["tableID"];
 $serviceType = $_GET["type"];
 
-$con = mysql_connect("localhost", "root", "123456");
+$con = mysql_connect("localhost", "root", "Unicoffee168");
 mysql_select_db("order");
 mysql_query("set names utf8");
 

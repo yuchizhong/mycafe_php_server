@@ -22,16 +22,20 @@ while ($row = mysql_fetch_array($result)) {
 mysql_free_result($result);
 
 if (intval($customerID) == 0) {
-	mysql_close($con);
-	echo 'ERROR_USER';
-	exit(1);
+        mysql_close($con);
+        echo 'ERROR_USER';
+        exit(1);
 }
 
 $arr = $json["order"];
 $total = $json["total"];
 $credit = $json["credit"];
-$tableID = $json["table"];
 $platform = $json["platform"];
+$type = $json["type"];
+$numPeople = $json["numPeople"];
+$order_date = $json["date"];
+$order_time = $json["time"];
+
 if ($platform == NULL || $platform == "") {
 	$platform == "0";
 }
@@ -40,21 +44,27 @@ if ($platform == NULL || $platform == "") {
 $current_date = date("Ymd");
 $current_time = date("H:i"); //add s if need seconds
 
+if ($order_date < $current_date || ($order_date == $current_date && $order_time <= $current_time)) {
+	mysql_close($con);
+	echo "ERROR_TIME";
+	exit(1);
+}
+
 mysql_query("START TRANSACTION");
 
 if ($platform != "1") {
-    mysql_query("UPDATE orders SET orderFlag=3 WHERE payFlag=0 AND orderFlag=0 AND storeID='$id' AND customerID='$customerID' AND platform<>1");
+    mysql_query("UPDATE preorders SET orderFlag=3 WHERE payFlag=0 AND orderFlag=0 AND storeID='$id' AND customerID='$customerID' AND platform<>1");
 }
 
-$q = "INSERT INTO orders VALUES (NULL, '$id', '$current_date', '$current_time', '$tableID', '$customerID', '0', '0', '0', '$total', '$credit', '0', '$platform')";
+$q = "INSERT INTO preorders VALUES (NULL, '$id', '$current_date', '$current_time', '$type', '$numPeople', '$order_date', '$order_time', '$customerID', '0', '0', '0', '$total', '$credit', '0', '$platform')";
 $result = mysql_query($q);
 mysql_free_result($result);
 
 $orderID = -1; //get orderID back from database
-$q = "SELECT MAX(orderID) FROM orders WHERE storeID='$id' AND customerID='$customerID'";
+$q = "SELECT MAX(preorderID) FROM preorders WHERE storeID='$id' AND customerID='$customerID'";
 $result = mysql_query($q);
 while ($row = mysql_fetch_array($result)) { 
-    $orderID = $row["MAX(orderID)"];
+    $orderID = $row["MAX(preorderID)"];
     break;
 }
 mysql_free_result($result);
@@ -63,7 +73,7 @@ foreach ($arr as $value) {
     $quantity = $value["quantity"];
     $dishID = $value["dishID"];
     
-    $q = "INSERT INTO orderDetails VALUES ('$dishID', '$id', '$orderID', '$quantity')";
+    $q = "INSERT INTO preorderDetails VALUES ('$dishID', '$id', '$orderID', '$quantity')";
     $result = mysql_query($q);
     mysql_free_result($result);
 
@@ -73,7 +83,7 @@ foreach ($arr as $value) {
 }
 
 $totalPrice = 0.0;
-$result = mysql_query("SELECT SUM(totalPrice) FROM orders WHERE storeID='$id' AND customerID='$customerID' AND payFlag=0 AND orderFlag=0");
+$result = mysql_query("SELECT SUM(totalPrice) FROM preorders WHERE storeID='$id' AND customerID='$customerID' AND payFlag=0 AND orderFlag=0");
 while ($row = mysql_fetch_array($result)) {
     $totalPrice = $row["SUM(totalPrice)"];
     break;

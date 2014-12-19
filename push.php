@@ -6,7 +6,7 @@ $userID = $_GET['customerID'];
 $user = $_GET['user'];
 $sok = true;
 
-$con = mysql_connect("localhost", "root", "123456");
+$con = mysql_connect("localhost", "root", "Unicoffee168");
 mysql_select_db("order");
 mysql_query("set names utf8");
 

@@ -14,10 +14,10 @@ while ($row = mysql_fetch_array($result)) {
 }
 mysql_free_result($result);
 
-$result = mysql_query("SELECT * FROM orders, stores WHERE customerID='$customerID' AND orders.storeID=stores.storeID ORDER BY orderID DESC LIMIT 50");
+$result = mysql_query("SELECT * FROM preorders, stores WHERE customerID='$customerID' AND preorders.storeID=stores.storeID ORDER BY preorderID DESC LIMIT 50");
 $arrlist = array();
 while ($row = mysql_fetch_array($result)) {
-	$temp = array('orderID'=>$row['orderID'], 'storeID'=>$row['storeID'], 'store'=>$row['storeName'], 'tableID'=>$row['tableID'], 'time'=>$row['date'] . ' ' . $row['time'], 'total'=>$row['totalPrice'], 'payed'=>$row['payFlag'], 'fetched'=>$row['fetchFlag'], 'printed'=>$row['orderFlag']);
+	$temp = array('orderID'=>$row['preorderID'], 'storeID'=>$row['storeID'], 'store'=>$row['storeName'], 'tableID'=>$row['tableID'], 'time'=>$row['date'] . ' ' . $row['time'], 'total'=>$row['totalPrice'], 'payed'=>$row['payFlag'], 'fetched'=>$row['fetchFlag'], 'printed'=>$row['orderFlag']);
 	array_push($arrlist, $temp);
 }
 

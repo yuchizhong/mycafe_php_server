@@ -2,7 +2,7 @@
 require(dirname(__FILE__) . '/encryption.php');
 $input_data = json_decode(file_get_contents("php://input"), true);
 
-$con = mysql_connect("localhost", "root", "123456");
+$con = mysql_connect("localhost", "root", "Unicoffee168");
 mysql_select_db("order");
 mysql_query("set names utf8");
 
@@ -13,6 +13,7 @@ if($input_data['object'] == 'charge') {
     $cli_ip = $input_data['client_ip'];
     $amount = floatval($input_data['amount']) / 100;
     $channel = $input_data['channel'];
+    $subject = $input_data['subject'];
     
     //search for the transaction
     $result = mysql_query("SELECT * FROM payment WHERE pingpp='$pingpp_no' AND client_ip='$cli_ip' AND channel='$channel' AND amount='$amount' AND pay_status='unpayed'");
@@ -38,9 +39,9 @@ if($input_data['object'] == 'charge') {
         exit();
     }
     
-    if ($mall == "normal") {
+    if ($mall == "normal" || $mall == "preorder" ||  $mall == "refill") {
         mysql_query("UPDATE payment SET pay_status='payed' WHERE pingpp='$pingpp_no' AND client_ip='$cli_ip' AND channel='$channel' AND amount='$amount'");
-        if ($storeID == 0) {
+        if ($storeID == 0 && $mall == "refill") {
             //to purse
 	    $pAmount = "";
 	    $result = mysql_query("SELECT purse FROM customers WHERE customerID='$userID'");
@@ -53,7 +54,10 @@ if($input_data['object'] == 'charge') {
             mysql_query("UPDATE customers SET purse='$pAmount' WHERE customerID='$userID'");
         } else {
             //to store
-            mysql_query("UPDATE orders SET payFlag=1 WHERE paymentID='$paymentID'");
+	    if ($mall == "preorder")
+		mysql_query("UPDATE preorders SET payFlag=1 WHERE paymentID='$paymentID'");
+	    else
+        	mysql_query("UPDATE orders SET payFlag=1 WHERE paymentID='$paymentID'");
         }
         
         //add credit///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
