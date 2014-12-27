@@ -21,8 +21,8 @@ if ($storeID < 0 || $amount < 0) {
 }
 $uname = $input_data['username'];
 
-$key = 'sk_test_rrzLCSebzbT8SKiH4GX9SWH8';
-$appid = 'app_5qjfH0GKyPy5y5ar';
+$key = 'sk_live_4WLOK0TuXLG0b94GCOX9GqXT';
+$appid = 'app_KufzX9DqvPy1ifDW';
 
 $con = mysql_connect("localhost", "root", "Unicoffee168");
 mysql_select_db("order");
@@ -112,7 +112,7 @@ if ($mall == "activity" && $channel == "purse") {
     mysql_free_result($result);
     
     //mark orders' payFlag and paymentID
-    mysql_query("UPDATE activityTransaction SET status=1, paymentID='$paymentID' WHERE transaction_id='$ctransaction_id'");
+    mysql_query("UPDATE activityTransaction SET status=1, paymentID='$paymentID', approve_status=1 WHERE transaction_id='$ctransaction_id'");
     //increment enrolled number
     mysql_query("UPDATE activity SET enrolled=enrolled+1 WHERE store_id='$storeID' AND activity_id='$activity_id'");
     echo "OK";
@@ -171,7 +171,7 @@ if ($mall == "activity" && $channel == "purse") {
             "app"       => array("id" => $appid)
         )
     );
-    echo $ch;
+    echo $paymentID . ':' . $ch;
 } elseif ($mall == "cash" && $channel == "purse") {
     $ctransaction_id = $input_data['transaction_id'];
     $amount = $input_data['price'];
@@ -260,7 +260,7 @@ if ($mall == "activity" && $channel == "purse") {
             "app"       => array("id" => $appid)
         )
     );
-    echo $ch;
+    echo $paymentID . ':' . $ch;
 } elseif (($mall == "normal" || $mall == "preorder") && $channel == "credit" && $storeID > 0) {
     //check and update remaining money
     $rem = 0;
@@ -444,7 +444,7 @@ if ($mall == "activity" && $channel == "purse") {
             "app"       => array("id" => $appid)
         )
     );
-    echo $ch;
+    echo $paymentID . ':' . $ch;
 } else if ($mall == "refill" && ($channel == "alipay" || $channel == "wx" || $channel == "upmp") && $storeID == 0) { // go to purse
     if (floatval($amount) <= 0) {
         mysql_query("ROLLBACK");
@@ -472,6 +472,13 @@ if ($mall == "activity" && $channel == "purse") {
     $result = mysql_query("INSERT INTO payment VALUES (NULL, '$mall', '$pingpp_no', '$cli_ip', '$channel', '$customerID', '$storeID', '$amount', '$current_date', '$current_time', 'unpayed')");
     mysql_free_result($result);
     
+    $result = mysql_query("SELECT MAX(paymentID) FROM payment");
+    while ($row = mysql_fetch_array($result)) {
+        $paymentID = intval($row["MAX(paymentID)"]);
+        break;
+    }
+    mysql_free_result($result);
+
     $amt_in_cent = intval($amount * 100);
     PingPP::setApiKey($key);
     $ch = PingPP_Charge::create(
@@ -486,7 +493,7 @@ if ($mall == "activity" && $channel == "purse") {
             "app"       => array("id" => $appid)
         )
     );
-    echo $ch;
+    echo $paymentID . ':' . $ch;
 } else {
     echo 'ERROR_TYPE';
 }

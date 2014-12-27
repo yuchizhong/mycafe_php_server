@@ -116,7 +116,7 @@ if($input_data['object'] == 'charge') {
         mysql_query("UPDATE cashTransaction SET status=1 WHERE paymentID='$paymentID'");
     } elseif ($mall == "activity") {
         mysql_query("UPDATE payment SET pay_status='payed' WHERE pingpp='$pingpp_no' AND client_ip='$cli_ip' AND channel='$channel' AND amount='$amount'");
-        mysql_query("UPDATE activityTransaction SET status=1 WHERE paymentID='$paymentID'");
+        mysql_query("UPDATE activityTransaction SET status=1, approve_status=1 WHERE paymentID='$paymentID'");
         //increment enrolled number
         //get activity_id
 	$activityID = 0;

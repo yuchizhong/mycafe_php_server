@@ -39,6 +39,7 @@ $wifi_ok = '0';
 $creditCanPay = 0;
 $creditToCentRatio = 1.0;
 $preorderOption = 0;
+$preorderAfterMinutes = 15;
 //$wifi_ssid = "";
 //$wifi_pass = "";
 while ($row = mysql_fetch_array($result)) {
@@ -51,6 +52,7 @@ while ($row = mysql_fetch_array($result)) {
 	$creditCanPay = $row['creditCanPay'];
 	$creditToCentRatio = $row['creditToCentRatio'];
 	$preorderOption = $row['canPreorder'];
+	$preorderAfterMinutes = $row['preorderAfterMinutes'];
 //	$wifi_ssid = $row['wifiSSID'];
 //	$wifi_pass = $row['wifiPASS'];
 	break;
@@ -79,7 +81,7 @@ if (setup_wifi($id, $ssid, $pass))
 	$wifi_ok = '1';
 */
 
-$arr = array('storeName'=>$storeName, 'beacons'=>$beacons, 'canPreorder'=>$preorderOption, 'wifi'=>$wifi_ok, 'payOption'=>$payOption, 'creditCanPay'=>$creditCanPay, 'creditToCentRatio'=>$creditToCentRatio, 'black'=>$black, 'support'=>$support, 'tableFlag'=>$tableFlag, 'menu'=>$arrlist);
+$arr = array('storeName'=>$storeName, 'beacons'=>$beacons, 'canPreorder'=>$preorderOption, 'preorderAfterMinutes'=>$preorderAfterMinutes, 'wifi'=>$wifi_ok, 'payOption'=>$payOption, 'creditCanPay'=>$creditCanPay, 'creditToCentRatio'=>$creditToCentRatio, 'black'=>$black, 'support'=>$support, 'tableFlag'=>$tableFlag, 'menu'=>$arrlist);
 echo json_encode($arr);
 mysql_free_result($result); 
 mysql_close($con);

@@ -114,8 +114,8 @@ if ($mall == "credit") {
     while ($row = mysql_fetch_array($result)) {
         $max = intval($row['max']);
 	$enrolled = intval($row['enrolled']);
-	$ac_date = $row['date'];
-    	$ac_time = $row['time'];
+	$ac_date = $row['deadline_date'];
+    	$ac_time = $row['deadline_time'];
    	$ac_price = floatval($row['price']);
 	break;
     }
@@ -144,11 +144,11 @@ if ($mall == "credit") {
 	//write to DB, if free, write status to 1 and inc enrolled
 	if ($ac_price == 0.0) {
 	    //insert new transaction
-	    mysql_query("INSERT INTO activityTransaction VALUES (NULL, '$storeID', '$activityID', '$customerID', '$current_date', '$current_time', '1', '0', '0')");
+	    mysql_query("INSERT INTO activityTransaction VALUES (NULL, '$storeID', '$activityID', '$customerID', '$current_date', '$current_time', '1', '0', '0', '0')");
 	    //increment enrolled number
             mysql_query("UPDATE activity SET enrolled=enrolled+1 WHERE store_id='$storeID' AND activity_id='$activityID'");
   	} else {
-	    mysql_query("INSERT INTO activityTransaction VALUES (NULL, '$storeID', '$activityID', '$customerID', '$current_date', '$current_time', '0', '0', '0')");
+	    mysql_query("INSERT INTO activityTransaction VALUES (NULL, '$storeID', '$activityID', '$customerID', '$current_date', '$current_time', '0', '0', '0', '0')");
 	}
    	 //get id for payment
    	 $q = "SELECT MAX(transaction_id) FROM activityTransaction";

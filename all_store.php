@@ -6,6 +6,14 @@ $lon = $_GET["longitude"];
 $lat = $_GET["latitude"];
 $mall = $_GET["mall"];
 $username = $_GET["username"];
+$nrows = $_GET["numRecords"];
+if ($nrows == NULL || $nrows == "") {
+    $nrows = 20;
+}
+$onlyCollected = $_GET["collected"];
+if ($onlyCollected == NULL || $onlyCollected == "") {
+    $onlyCollected = 0;
+}
 
 $con = mysql_connect("localhost", "root", "Unicoffee168");
 mysql_select_db("order");
@@ -32,10 +40,16 @@ mysql_free_result($result);
 if ($userID == NULL)
 	$userID = "";
 
-$q = "SELECT * FROM stores WHERE storeName IS NOT NULL AND addr IS NOT NULL ORDER BY ACOS(SIN(('$lat' * 3.1415) / 180 ) *SIN((latitude * 3.1415) / 180 ) + COS(('$lat' * 3.1415) / 180 ) * COS((latitude * 3.1415) / 180 ) *COS(('$lon' * 3.1415) / 180 - (longitude * 3.1415) / 180 ) ) * 6380 ASC, storeID DESC LIMIT 20";
+$q = "SELECT * FROM stores WHERE storeName IS NOT NULL AND addr IS NOT NULL ORDER BY ACOS(SIN(('$lat' * 3.1415) / 180 ) *SIN((latitude * 3.1415) / 180 ) + COS(('$lat' * 3.1415) / 180 ) * COS((latitude * 3.1415) / 180 ) *COS(('$lon' * 3.1415) / 180 - (longitude * 3.1415) / 180 ) ) * 6380 ASC, storeID DESC LIMIT $nrows";
+if ($onlyCollected == 1) {
+	$q = "SELECT * FROM stores, collect WHERE storeName IS NOT NULL AND addr IS NOT NULL AND collect.user_id='$userID' AND stores.storeID=collect.store_id ORDER BY ACOS(SIN(('$lat' * 3.1415) / 180 ) *SIN((latitude * 3.1415) / 180 ) + COS(('$lat' * 3.1415) / 180 ) * COS((latitude * 3.1415) / 180 ) *COS(('$lon' * 3.1415) / 180 - (longitude * 3.1415) / 180 ) ) * 6380 ASC, storeID DESC LIMIT $nrows";
+}
 if ($mall != null && $mall != "") {
 	$condition = "have_" . $mall . "=1";
-	$q = "SELECT * FROM stores WHERE storeName IS NOT NULL AND $condition AND addr IS NOT NULL ORDER BY ACOS(SIN(('$lat' * 3.1415) / 180 ) *SIN((latitude * 3.1415) / 180 ) + COS(('$lat' * 3.1415) / 180 ) * COS((latitude * 3.1415) / 180 ) *COS(('$lon' * 3.1415) / 180 - (longitude * 3.1415) / 180 ) ) * 6380 ASC, storeID DESC LIMIT 20";
+	$q = "SELECT * FROM stores WHERE storeName IS NOT NULL AND $condition AND addr IS NOT NULL ORDER BY ACOS(SIN(('$lat' * 3.1415) / 180 ) *SIN((latitude * 3.1415) / 180 ) + COS(('$lat' * 3.1415) / 180 ) * COS((latitude * 3.1415) / 180 ) *COS(('$lon' * 3.1415) / 180 - (longitude * 3.1415) / 180 ) ) * 6380 ASC, storeID DESC LIMIT $nrows";
+	if ($onlyCollected == 1) {
+        	$q = "SELECT * FROM stores, collect WHERE storeName IS NOT NULL AND $condition AND addr IS NOT NULL AND collect.user_id='$userID' AND stores.storeID=collect.store_id ORDER BY ACOS(SIN(('$lat' * 3.1415) / 180 ) *SIN((latitude * 3.1415) / 180 ) + COS(('$lat' * 3.1415) / 180 ) * COS((latitude * 3.1415) / 180 ) *COS(('$lon' * 3.1415) / 180 - (longitude * 3.1415) / 180 ) ) * 6380 ASC, storeID DESC LIMIT $nrows";
+	}
 }
 
 $result = mysql_query($q);

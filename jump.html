@@ -1,8 +1,30 @@
 <html>
-<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <script type="text/javascript">
+  function applinkfail(){
+        var clickedAt = +new Date;
+        // During tests on 3g/3gs this timeout fires immediately if less than 500ms.
+        setTimeout(function(){
+            // To avoid failing on return to MobileSafari, ensure freshness!
+            if (+new Date - clickedAt < 2000){
+                window.location = "jump_2.html";
+            }
+        }, 500);    
+  }
+
+  function link_to(address)
+  {
+   window.location.href=address;
+  }
+
+  function jump_app() {
+    applinkfail();
     window.location.href="unicafe://";
+  }
+
+  jump_app();
 </script>
-<!-- jump failed -->
-<img style="width: 100%" src="jump.jpg">
+</head>
 </html>
