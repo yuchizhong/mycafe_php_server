@@ -21,8 +21,8 @@ if ($storeID < 0 || $amount < 0) {
 }
 $uname = $input_data['username'];
 
-$key = 'sk_live_4WLOK0TuXLG0b94GCOX9GqXT';
-$appid = 'app_KufzX9DqvPy1ifDW';
+$key = 'sk_test_rrzLCSebzbT8SKiH4GX9SWH8';
+$appid = 'app_5qjfH0GKyPy5y5ar';
 
 $con = mysql_connect("localhost", "root", "Unicoffee168");
 mysql_select_db("order");
