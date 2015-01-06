@@ -51,7 +51,7 @@ if($input_data['object'] == 'charge') {
     	}
     	mysql_free_result($result);
 	$pAmount = enc(strval(floatval(dec($pAmount)) + $amount));
-            mysql_query("UPDATE customers SET purse='$pAmount' WHERE customerID='$userID'");
+        mysql_query("UPDATE customers SET purse='$pAmount' WHERE customerID='$userID'");
         } else {
             //to store
 	    if ($mall == "preorder")
