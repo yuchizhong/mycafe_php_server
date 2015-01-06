@@ -29,8 +29,6 @@ while ($row = mysql_fetch_array($result)) {
     // Provide the Device Identifier (Ensure that the Identifier does not have spaces in it).
     // Replace this token with the token of the iOS device that is to receive the notification.
     $tToken = $row["push_token"];
-    if ($tToken == NULL || $tToken == "")
-        continue;
     if(!send_push($msg, $tToken)) {
 	$sok = false;
 	break;
