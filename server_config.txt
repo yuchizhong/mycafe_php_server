@@ -1,1 +1,1 @@
-link=https://123.56.108.202;version=1.2;force_update=YES
+link=http://123.57.135.129;version=1.0;force_update=YES
