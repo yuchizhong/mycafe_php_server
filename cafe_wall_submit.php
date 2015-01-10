@@ -50,7 +50,7 @@ mysql_free_result($result);
 $maxPostID++;
 
 //insert
-mysql_query("INSERT INTO cafeWall VALUES ('$storeID', '$maxPostID', '$userID', '0', '$foodID', '$current_date', '$current_time', '', '', '1', '0', '$gender', '$lowerAge', '$upperAge', '$message')");
+mysql_query("INSERT INTO cafeWall VALUES ('$storeID', '$maxPostID', '$userID', '0', '$foodID', '$current_date', '$current_time', '', '', '0', '0', '$gender', '$lowerAge', '$upperAge', '$message')");
 mysql_query("COMMIT");
 
 echo 'OK_' . $maxPostID;

@@ -63,7 +63,7 @@ $myage = intval($current_year) - $mybirthyear;
 $gendercheck = ""; //AND (cafeWall.rest_gender=0 OR (cafeWall.rest_gender=1 AND 0='$mygender') OR (cafeWall.rest_gender=2 AND 1='$mygender'))
 $agecheck = "";    //AND (cafeWall.rest_age_begin=0 OR cafeWall.rest_age_begin<='$myage') AND (cafeWall.rest_age_end=0 OR cafeWall.rest_age_end>='$myage')
 $userNotSelf = ""; //AND cafeWall.post_userID<>'$userID'
-$q = "SELECT * FROM cafeWall, dishes, customers, userinfo WHERE $gendercheck $agecheck $userNotSelf cafeWall.status=1 AND cafeWall.storeID='$storeID' AND dishes.storeID='$storeID' AND cafeWall.post_userID=userinfo.userID AND cafeWall.foodID=dishes.dishID AND cafeWall.post_userID=customers.customerID ORDER BY postID ASC";
+$q = "SELECT * FROM cafeWall, dishes, customers, userinfo WHERE $gendercheck $agecheck $userNotSelf cafeWall.status=1 AND cafeWall.storeID='$storeID' AND dishes.storeID='$storeID' AND cafeWall.post_userID=userinfo.userID AND cafeWall.foodID=dishes.dishID AND cafeWall.post_userID=customers.customerID ORDER BY postID DESC";
 $result = mysql_query($q);
 $arrlist = array();
 while ($row = mysql_fetch_array($result)) {

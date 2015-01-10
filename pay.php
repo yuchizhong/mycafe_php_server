@@ -79,7 +79,93 @@ $pingpp_no = "";
 $current_date = date("Ymd");
 $current_time = date("H:i"); //add s if need seconds
 
-if ($mall == "activity" && $channel == "purse") {
+if ($mall == "wall" && $channel == "purse") {
+    $postID = $input_data['postID'];
+
+    //check and update remaining money
+    $rem = 0.0;
+    $result = mysql_query("SELECT purse FROM customers WHERE customerID='$customerID'");
+    while ($row = mysql_fetch_array($result)) {
+        $rem = floatval(dec($row['purse']));
+    }
+    mysql_free_result($result);
+    if ($rem < $amount) {
+        mysql_query("ROLLBACK");
+        mysql_close($con);
+        echo 'ERROR_ISF_' . $rem;
+        exit();
+    }
+    $rem = enc(strval($rem - $amount));
+    mysql_query("UPDATE customers SET purse='$rem' WHERE customerID='$customerID'");
+
+    //add payment
+    mysql_query("INSERT INTO payment VALUES (NULL, '$mall', '', '$cli_ip', '$channel', '$customerID', '$storeID', '$amount', '$current_date', '$current_time', 'payed')");
+
+    //get paymentID
+    $result = mysql_query("SELECT MAX(paymentID) FROM payment");
+    while ($row = mysql_fetch_array($result)) {
+        $paymentID = intval($row["MAX(paymentID)"]);
+        break;
+    }
+    mysql_free_result($result);
+
+    //mark wall payed
+    mysql_query("UPDATE cafeWall SET status=1, paymentID='$paymentID' WHERE storeID='$storeID' AND postID='$postID'");
+    echo "OK";
+} elseif ($mall == "wall" && ($channel == "alipay" || $channel == "wx" || $channel == "upmp")) {
+    $postID = $input_data['postID'];
+
+    if (floatval($amount) <= 0) {
+        mysql_query("ROLLBACK");
+        mysql_close($con);
+        echo 'ERROR_ZERO';
+        exit();
+    }
+
+    $pingpp_max = "";
+    $result = mysql_query("SELECT MAX(pingpp) FROM payment");
+    while ($row = mysql_fetch_array($result)) {
+        $pingpp_max = strval($row["MAX(pingpp)"]);
+        break;
+    }
+    mysql_free_result($result);
+
+    $pingpp_max_no = base_convert($pingpp_max, 36, 10) + 1;
+    $pingpp_no = base_convert(strval($pingpp_max_no), 10, 36);
+
+    //8位补齐
+    if (strlen($pingpp_no) < 32) {
+        $pingpp_no = str_pad($pingpp_no, 32, '0', STR_PAD_LEFT);
+    }
+
+    //add payment
+    mysql_query("INSERT INTO payment VALUES (NULL, '$mall', '$pingpp_no', '$cli_ip', '$channel', '$customerID', '$storeID', '$amount', '$current_date', '$current_time', 'unpayed')");
+
+    $result = mysql_query("SELECT MAX(paymentID) FROM payment");
+    while ($row = mysql_fetch_array($result)) {
+        $paymentID = intval($row["MAX(paymentID)"]);
+        break;
+    }
+    mysql_free_result($result);
+
+    mysql_query("UPDATE cafeWall SET paymentID='$paymentID' WHERE storeID='$storeID' AND postID='$postID' AND status=0");
+
+    $amt_in_cent = intval($amount * 100);
+    PingPP::setApiKey($key);
+    $ch = PingPP_Charge::create(
+        array(
+            "subject"   => "UniCafe咖啡墙",
+            "body"      => "共计￥" . $amount . "（店名：" . $storeName . ",账号：" . $uname . "）",
+            "amount"    => $amt_in_cent,
+            "order_no"  => $pingpp_no,
+            "currency"  => "cny",
+            "channel"   => $channel,
+            "client_ip" => $_SERVER["REMOTE_ADDR"],
+            "app"       => array("id" => $appid)
+        )
+    );
+    echo $paymentID . ':' . $ch;
+} elseif ($mall == "activity" && $channel == "purse") {
     $ctransaction_id = $input_data['transaction_id'];
     $amount = $input_data['price'];
     $activity_id = $input_data['activity_id']; 

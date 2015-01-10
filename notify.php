@@ -127,6 +127,9 @@ if($input_data['object'] == 'charge') {
         }
         mysql_free_result($result);
         mysql_query("UPDATE activity SET enrolled=enrolled+1 WHERE store_id='$storeID' AND activity_id='$activityID'");
+    } elseif ($mall == "wall") {
+        mysql_query("UPDATE payment SET pay_status='payed' WHERE pingpp='$pingpp_no' AND client_ip='$cli_ip' AND channel='$channel' AND amount='$amount'");
+        mysql_query("UPDATE cafeWall SET status=1 WHERE paymentID='$paymentID'");
     }
     
     echo 'success';
