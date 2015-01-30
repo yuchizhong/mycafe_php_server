@@ -42,9 +42,9 @@ $current_time = date("H:i"); //add s if need seconds
 
 mysql_query("START TRANSACTION");
 
-if ($platform != "1") {
-    mysql_query("UPDATE orders SET orderFlag=3 WHERE payFlag=0 AND orderFlag=0 AND storeID='$id' AND customerID='$customerID' AND platform<>1");
-}
+//if ($platform != "1") {
+//    mysql_query("UPDATE orders SET orderFlag=3 WHERE payFlag=0 AND orderFlag=0 AND storeID='$id' AND customerID='$customerID' AND platform<>1");
+//}
 
 $q = "INSERT INTO orders VALUES (NULL, '$id', '$current_date', '$current_time', '$tableID', '$customerID', '0', '0', '0', '$total', '$credit', '0', '$platform')";
 $result = mysql_query($q);
