@@ -58,13 +58,7 @@ while ($row = mysql_fetch_array($result)) {
 	break;
 }
 mysql_free_result($result);
-$result = mysql_query("SELECT * FROM beacons WHERE storeID='$id'");
-$beacons = array();
-while ($row = mysql_fetch_array($result)) {
-        $b = array('major'=>$row['major'], 'minor'=>$row['minor']);
-	array_push($beacons, $b);
-}
-mysql_free_result($result);
+
 $result = mysql_query("SELECT * FROM dishes, dishCategory WHERE dishes.storeID='$id' AND dishes.storeID=dishCategory.storeID AND dishes.catagory=dishCategory.categoryID ORDER BY categoryID ASC, dishID ASC");
 $arrlist = array();
 while ($row = mysql_fetch_array($result)) {
@@ -81,7 +75,7 @@ if (setup_wifi($id, $ssid, $pass))
 	$wifi_ok = '1';
 */
 
-$arr = array('storeName'=>$storeName, 'beacons'=>$beacons, 'canPreorder'=>$preorderOption, 'preorderAfterMinutes'=>$preorderAfterMinutes, 'wifi'=>$wifi_ok, 'payOption'=>$payOption, 'creditCanPay'=>$creditCanPay, 'creditToCentRatio'=>$creditToCentRatio, 'black'=>$black, 'support'=>$support, 'tableFlag'=>$tableFlag, 'menu'=>$arrlist);
+$arr = array('storeName'=>$storeName, 'canPreorder'=>$preorderOption, 'preorderAfterMinutes'=>$preorderAfterMinutes, 'wifi'=>$wifi_ok, 'payOption'=>$payOption, 'creditCanPay'=>$creditCanPay, 'creditToCentRatio'=>$creditToCentRatio, 'black'=>$black, 'support'=>$support, 'tableFlag'=>$tableFlag, 'menu'=>$arrlist);
 echo json_encode($arr);
 mysql_free_result($result); 
 mysql_close($con);

@@ -1,18 +1,15 @@
 <?php 
-$province = $_GET["province"];
-$city = $_GET["city"];
-$district = $_GET["district"];
 $lon = $_GET["longitude"];
 $lat = $_GET["latitude"];
 $username = $_GET["username"];
+$store_id = $_GET["app_store_id"];
 $nrows = $_GET["numRecords"];
 if ($nrows == NULL || $nrows == "") {
     $nrows = 20;
 }
-$onlyCollected = $_GET["collected"];
-if ($onlyCollected == NULL || $onlyCollected == "") {
-    $onlyCollected = 0;
-}
+
+if ($store_id == NULL)
+	$store_id = 0;
 
 $con = mysql_connect("localhost", "root", "Unicoffee168");
 mysql_select_db("order");
@@ -44,9 +41,9 @@ $current_date = date("Ymd");
 $current_time = date("H:i"); //add s if need seconds
 
 $q = "SELECT * FROM activity, stores WHERE publish_status=1 AND storeName IS NOT NULL AND addr IS NOT NULL AND date IS NOT NULL AND deadline_date IS NOT NULL AND activity.date>='$current_date' AND activity.store_id=stores.storeID ORDER BY ACOS(SIN(('$lat' * 3.1415) / 180 ) *SIN((latitude * 3.1415) / 180 ) + COS(('$lat' * 3.1415) / 180 ) * COS((latitude * 3.1415) / 180 ) *COS(('$lon' * 3.1415) / 180 - (longitude * 3.1415) / 180 ) ) * 6380 ASC LIMIT $nrows";
-if ($onlyCollected == 1) {
-	$q = "SELECT * FROM activity, stores, collect WHERE publish_status=1 AND storeName IS NOT NULL AND addr IS NOT NULL AND date IS NOT NULL AND deadline_date IS NOT NULL AND activity.store_id=collect.store_id AND collect.user_id='$userID' AND activity.date>='$current_date' AND activity.store_id=stores.storeID ORDER BY ACOS(SIN(('$lat' * 3.1415) / 180 ) *SIN((latitude * 3.1415) / 180 ) + COS(('$lat' * 3.1415) / 180 ) * COS((latitude * 3.1415) / 180 ) *COS(('$lon' * 3.1415) / 180 - (longitude * 3.1415) / 180 ) ) * 6380 ASC LIMIT $nrows";
-}
+
+if ($store_id > 0)
+	$q = "SELECT * FROM activity, stores WHERE activity.store_id='$store_id' AND publish_status=1 AND storeName IS NOT NULL AND addr IS NOT NULL AND date IS NOT NULL AND deadline_date IS NOT NULL AND activity.date>='$current_date' AND activity.store_id=stores.storeID ORDER BY activity.activity_id DESC LIMIT $nrows";
 
 $result = mysql_query($q);
 $arrlist = array();
