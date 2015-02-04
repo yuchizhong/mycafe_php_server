@@ -411,10 +411,18 @@ if ($mall == "wall" && $channel == "purse") {
     mysql_free_result($result);
 
     //mark orders' payFlag and paymentID
-    if ($mall == "preorder") 
+    if ($mall == "preorder")  {
 	mysql_query("UPDATE preorders SET payFlag=1, paymentID='$paymentID' WHERE customerID='$customerID' AND storeID='$storeID' AND payFlag=0 AND orderFlag=0");
-    else
-    	mysql_query("UPDATE orders SET payFlag=1, paymentID='$paymentID' WHERE customerID='$customerID' AND storeID='$storeID' AND payFlag=0 AND orderFlag=0");
+    } else {
+        //find max
+        $m_orderID = 0;
+        $result = mysql_query("SELECT MAX(orderID) FROM orders WHERE customerID='$customerID' AND storeID='$storeID'");
+        while ($row = mysql_fetch_array($result)) {
+            $m_orderID = intval($row['MAX(orderID)']);
+        }
+        mysql_free_result($result);
+    	mysql_query("UPDATE orders SET payFlag=1, paymentID='$paymentID' WHERE orderID='$m_orderID'");
+    }
     
     echo 'OK';
 } elseif (($mall == "normal" || $mall == "preorder") && $channel == "purse" && $storeID > 0) {

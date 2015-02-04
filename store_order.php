@@ -82,7 +82,7 @@ mysql_free_result($result);
 
 mysql_query("COMMIT");
 
-echo 'OK_' . $orderID . ':' . $totalPrice;
+echo 'OK_' . $orderID . ':' . $total;
 
 mysql_close($con);
 ?>
