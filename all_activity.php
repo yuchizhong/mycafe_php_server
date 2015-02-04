@@ -40,10 +40,10 @@ if ($userID == NULL)
 $current_date = date("Ymd");
 $current_time = date("H:i"); //add s if need seconds
 
-$q = "SELECT * FROM activity, stores WHERE publish_status=1 AND storeName IS NOT NULL AND addr IS NOT NULL AND date IS NOT NULL AND deadline_date IS NOT NULL AND activity.date>='$current_date' AND activity.store_id=stores.storeID ORDER BY ACOS(SIN(('$lat' * 3.1415) / 180 ) *SIN((latitude * 3.1415) / 180 ) + COS(('$lat' * 3.1415) / 180 ) * COS((latitude * 3.1415) / 180 ) *COS(('$lon' * 3.1415) / 180 - (longitude * 3.1415) / 180 ) ) * 6380 ASC LIMIT $nrows";
+$q = "SELECT *, activity.description AS ac_desp FROM activity, stores WHERE publish_status=1 AND storeName IS NOT NULL AND addr IS NOT NULL AND date IS NOT NULL AND deadline_date IS NOT NULL AND activity.date>='$current_date' AND activity.store_id=stores.storeID ORDER BY ACOS(SIN(('$lat' * 3.1415) / 180 ) *SIN((latitude * 3.1415) / 180 ) + COS(('$lat' * 3.1415) / 180 ) * COS((latitude * 3.1415) / 180 ) *COS(('$lon' * 3.1415) / 180 - (longitude * 3.1415) / 180 ) ) * 6380 ASC LIMIT $nrows";
 
 if ($store_id > 0)
-	$q = "SELECT * FROM activity, stores WHERE activity.store_id='$store_id' AND publish_status=1 AND storeName IS NOT NULL AND addr IS NOT NULL AND date IS NOT NULL AND deadline_date IS NOT NULL AND activity.date>='$current_date' AND activity.store_id=stores.storeID ORDER BY activity.activity_id DESC LIMIT $nrows";
+	$q = "SELECT *, activity.description AS ac_desp FROM activity, stores WHERE activity.store_id='$store_id' AND publish_status=1 AND storeName IS NOT NULL AND addr IS NOT NULL AND date IS NOT NULL AND deadline_date IS NOT NULL AND activity.date>='$current_date' AND activity.store_id=stores.storeID ORDER BY activity.activity_id DESC LIMIT $nrows";
 
 $result = mysql_query($q);
 $arrlist = array();
@@ -60,7 +60,8 @@ while ($row = mysql_fetch_array($result)) {
     }
     mysql_free_result($result2);
     $temp['userEnrolled'] = $userEnrolled;
-
+    
+    /*
     $collected = '0';
     $result2 = mysql_query("SELECT * FROM collect WHERE user_id='$userID' AND store_id='$sid'");
     while ($row2 = mysql_fetch_array($result2)) {
@@ -69,7 +70,15 @@ while ($row = mysql_fetch_array($result)) {
     }
     mysql_free_result($result2);
     $temp['collected'] = $collected;
-
+     */
+    
+    $scoreCost = 0;
+    if ($row["bScoreEnroll"] == 1)
+	$scoreCost = $row["enrolledScores"];
+    elseif ($row["bDonateScore"] == 1)
+	$scoreCost = -intval($row["donateScores"]);
+    $temp["creditPrice"] = strval($scoreCost);
+ 
     foreach ($row as $key => $value) {
         if (is_numeric($key))
                 continue;

@@ -202,6 +202,39 @@ if ($mall == "wall" && $channel == "purse") {
     //increment enrolled number
     mysql_query("UPDATE activity SET enrolled=enrolled+1 WHERE store_id='$storeID' AND activity_id='$activity_id'");
     echo "OK";
+} elseif ($mall == "activity" && $channel == "credit") {
+    $ctransaction_id = $input_data['transaction_id'];
+    $amount = $input_data['creditPrice'];
+    $activity_id = $input_data['activity_id'];
+    
+    //check and update remaining money
+    $rem = 0;
+    $chain_id = 0;
+    $result = mysql_query("SELECT credit, credit.chain_id FROM stores, credit WHERE credit.user_id='$customerID' AND stores.storeID='$storeID' AND stores.chain_id=credit.chain_id");
+    while ($row = mysql_fetch_array($result)) {
+        $rem = intval($row['credit']);
+        $chain_id = intval($row['chain_id']);
+    }
+    mysql_free_result($result);
+    $rem = $rem - $amount; //can be < 0
+    mysql_query("UPDATE credit SET credit='$rem' WHERE chain_id='$chain_id' AND user_id='$customerID'");
+    
+    //add payment
+    mysql_query("INSERT INTO payment VALUES (NULL, '$mall', '', '$cli_ip', '$channel', '$customerID', '$storeID', '$amount', '$current_date', '$current_time', 'payed')");
+
+    //get paymentID
+    $result = mysql_query("SELECT MAX(paymentID) FROM payment");
+    while ($row = mysql_fetch_array($result)) {
+        $paymentID = intval($row["MAX(paymentID)"]);
+        break;
+    }
+    mysql_free_result($result);
+    
+    //mark orders' payFlag and paymentID
+    mysql_query("UPDATE activityTransaction SET status=1, paymentID='$paymentID', approve_status=1 WHERE transaction_id='$ctransaction_id'");
+    //increment enrolled number
+    mysql_query("UPDATE activity SET enrolled=enrolled+1 WHERE store_id='$storeID' AND activity_id='$activity_id'");
+    echo "OK";
 } elseif ($mall == "activity" && ($channel == "alipay" || $channel == "wx" || $channel == "upmp")) {
     $ctransaction_id = $input_data['transaction_id'];
     $amount = $input_data['price'];
